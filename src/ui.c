@@ -465,7 +465,28 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 		cx_ecfp_private_key_t privateKey;
 		cx_ecdsa_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, &privateKey);
 
-		tx = cx_ecdsa_sign((void*) &privateKey, CX_RND_TRNG | CX_LAST, CX_NONE, hash, HASH_SIZE, G_io_apdu_buffer);
+		BEGIN_TRY
+		{
+			TRY
+			{
+				tx = cx_ecdsa_sign((void*) &privateKey, CX_LAST, CX_NONE, hash, HASH_SIZE, G_io_apdu_buffer);
+			}
+			CATCH_OTHER(e)
+			{
+				G_io_apdu_buffer[tx++] = e >> 8;
+				G_io_apdu_buffer[tx++] = e;
+				tx += 2;
+				io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
+				ui_idle();
+				return 0;
+			}
+			FINALLY
+			{
+			}
+		}
+		END_TRY;
+
+
 		// G_io_apdu_buffer[0] &= 0xF0; // discard the parity information
 		raw_tx_ix = 0;
 		raw_tx_len = 0;

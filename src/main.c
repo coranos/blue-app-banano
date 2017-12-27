@@ -67,7 +67,7 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
 /** #### instructions start #### **/
 /** instruction to reset the transaction. */
-#define INS_RESET 0x01
+#define INS_RESET 0x03
 
 /** instruction to sign transaction and send back the signature. */
 #define INS_SIGN 0x02
@@ -150,6 +150,7 @@ static void neo_main(void) {
 							// reset the temporary variables.
 							raw_tx_ix = 0;
 							raw_tx_len = 0;
+							tx = 0;
 
 							// return 0x9000 OK.
 							THROW(0x9000);
@@ -222,6 +223,7 @@ static void neo_main(void) {
 								bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
 								bip44_in += 4;
 							}
+
 							unsigned char privateKeyData[32];
 							os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
 							cx_ecdsa_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, &privateKey);
@@ -231,8 +233,8 @@ static void neo_main(void) {
 							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
 
 							// push the public key onto the response buffer.
-							os_memmove(G_io_apdu_buffer, publicKey.W, 65);
-							tx = 65;
+							os_memmove(G_io_apdu_buffer, publicKey.W, publicKey.W_len);
+							tx = publicKey.W_len;
 
 							// return 0x9000 OK.
 							THROW(0x9000);

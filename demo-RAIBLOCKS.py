@@ -23,19 +23,27 @@ bipp44_path = (
                "8000002C"
               +"80000378"
               +"80000000"
-              +"00000000"
-              +"00000000")
+              +"80000000"
+              +"80000000")
 
 # sending to AHXSMB19pWytwJ7vzvCw5aWmd1DUniDKRT
 
 # blank tx
-textToSign_01 = bytes(("" + bipp44_path + "").decode('hex'))
+textToSign_01 = bytes(("0000" + bipp44_path + "").decode('hex'))
 
 textToSignArray = [textToSign_01]
 
 dongle = getDongle(True)
+
+print "STARTED resetStatus "
+resetStatus = dongle.exchange(bytes(("80030000FF"+ bipp44_path).decode('hex')))
+print "SUCCESS resetStatus " + str(resetStatus).encode('hex')
+
+print "STARTED publicKey "
 publicKey = dongle.exchange(bytes(("80040000FF"+ bipp44_path).decode('hex')))
-print "publicKey " + str(publicKey).encode('hex')
+print "SUCCESS publicKey " + str(publicKey).encode('hex')
+
+print "STARTED sending transactions (sign on device)"
 
 for textToSign in textToSignArray:
 	try:
@@ -59,3 +67,4 @@ for textToSign in textToSignArray:
 		else:
 			print "Invalid status " + hex(comm.sw)
 
+print "SUCCESS sending transactions "
