@@ -13,11 +13,12 @@
    https://blake2.net.
 */
 
+#include "blake2b.h"
+
 #include <string.h>
 
-#include "macros.h"
-#include "blake2b.h"
 #include "blake2_common.h"
+#include "macros.h"
 
 typedef struct blake2b_param__
 {

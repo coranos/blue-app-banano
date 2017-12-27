@@ -42,10 +42,15 @@ print "SUCCESS resetStatus " + str(resetStatus).encode('hex')
 print "STARTED privateKey "
 publicKey = dongle.exchange(bytes(("80050000FF"+ bipp44_path).decode('hex')))
 print "SUCCESS privateKey " + str(publicKey).encode('hex')
+print "EXPECT  privateKey " + "0000000000000000000000000000000000000000000000000000000000000000"
+#print "EXPECT  privateKey " + "17799D6ED28AB940A23B04C2EAE5CA393FACE3C79ABB84B8C5F9069C697D25A4"
 
 print "STARTED publicKey "
 publicKey = dongle.exchange(bytes(("80040000FF"+ bipp44_path).decode('hex')))
 print "SUCCESS publicKey " + str(publicKey).encode('hex')
+print "EXPECT  publicKey " + "19D3D919475DEED4696B5D13018151D1AF88B2BD3BCFF048B45031C1F36D1858"
+print "BADSHA  publicKey " + "3B6A27BCCEB6A42D62A3A8D02A6F0D73653215771DE243A63AC048A18B59DA29"
+#print "EXPECT  publicKey " + "F1B8607D09CDD020D5B6EF20B8B345AFD69BE4E6577A10733293F1359AB26A6F"
 
 print "STARTED sending transactions (sign on device)"
 

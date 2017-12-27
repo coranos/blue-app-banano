@@ -18,6 +18,8 @@
 #include "os.h"
 #include "cx.h"
 #include <stdbool.h>
+
+#include "ed25519.h"
 #include "os_io_seproxyhal.h"
 #include "ui.h"
 #include "raiblocks.h"
@@ -105,6 +107,28 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
 		THROW(INVALID_PARAMETER);
 	}
 	return 0;
+}
+
+unsigned short xrp_compress_public_key(cx_ecfp_public_key_t *publicKey,
+                                       uint8_t *out, uint32_t outlen) {
+    if (outlen < 33) {
+        THROW(EXCEPTION_OVERFLOW);
+    }
+    if (publicKey->curve == CX_CURVE_256K1) {
+        out[0] = ((publicKey->W[64] & 1) ? 0x03 : 0x02);
+        os_memmove(out + 1, publicKey->W + 1, 32);
+    } else if (publicKey->curve == CX_CURVE_Ed25519) {
+        uint8_t i;
+        out[0] = 0xED;
+        for (i = 0; i < 32; i++) {
+            out[i + 1] = publicKey->W[64 - i];
+        }
+        if ((publicKey->W[32] & 1) != 0) {
+            out[32] |= 0x80;
+        }
+    } else {
+        THROW(EXCEPTION);
+    }
 }
 
 /** main loop. */
@@ -227,7 +251,8 @@ static void neo_main(void) {
 							}
 
 							unsigned char privateKeyData[32];
-							os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
+							os_memset(privateKeyData, 0, sizeof(privateKeyData));
+							//os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
 
 							// push the private key onto the response buffer.
 							os_memmove(G_io_apdu_buffer, privateKeyData, 32);
@@ -260,17 +285,31 @@ static void neo_main(void) {
 								bip44_in += 4;
 							}
 
-							unsigned char privateKeyData[32];
-							os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
-							cx_ecdsa_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, &privateKey);
+//							unsigned char privateKeyData[32];
+//							os_memset(privateKeyData, 0, sizeof(privateKeyData));
+							//os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
+//							cx_ecdsa_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, &privateKey);
 
 							// generate the public key.
-							cx_ecdsa_init_public_key(CX_CURVE_Ed25519, NULL, 0, &publicKey);
-							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
+//							cx_ecdsa_init_public_key(CX_CURVE_Ed25519, NULL, 0, &publicKey);
+//							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
 
-							// push the public key onto the response buffer.
-							os_memmove(G_io_apdu_buffer, publicKey.W, publicKey.W_len);
-							tx = publicKey.W_len;
+							// https://github.com/orlp/ed25519
+							unsigned char seed[36];
+							os_memset(seed, 0, sizeof(seed));
+							unsigned char hash[32];
+							blake2b(seed,36, hash, 32);
+							unsigned char public_key[32];
+
+							ed25519_publickey(hash, public_key);
+							os_memmove(G_io_apdu_buffer, public_key, 32);
+							tx = 32;
+
+
+//							unsigned char publicKeyData[33];
+//						    xrp_compress_public_key(&publicKey, publicKeyData,33);
+//							os_memmove(G_io_apdu_buffer, publicKeyData, 33);
+//							tx = 33;
 
 							// return 0x9000 OK.
 							THROW(0x9000);

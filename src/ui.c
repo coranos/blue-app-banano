@@ -447,7 +447,7 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 
 		unsigned char hash[HASH_SIZE];
 
-		blake2b(raw_tx,raw_tx_len_except_bip44, hash, HASH_SIZE);
+		blake2b(raw_tx,raw_tx_len_except_bip44,hash, HASH_SIZE);
 
 		unsigned char * bip44_in = raw_tx + raw_tx_len_except_bip44;
 

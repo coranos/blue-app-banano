@@ -22,7 +22,7 @@ include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
 
-APPNAME = "RAIBLOCKS"
+APPNAME = "RaiBlocks"
 APPVERSION = 1.0.0
 APP_LOAD_PARAMS = --path "44'/888'" --appFlags 0x40 --apdu --curve ed25519 $(COMMON_LOAD_PARAMS)
 APP_DELETE_PARAMS =  --apdu $(COMMON_DELETE_PARAMS)
@@ -36,6 +36,8 @@ endif
 # Build configuration
 
 APP_SOURCE_PATH += src
+APP_SOURCE_PATH += blake2b_src
+APP_SOURCE_PATH += ed25519_src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
 DEFINES += APPVERSION=\"$(APPVERSION)\"
@@ -65,7 +67,7 @@ $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
 CC := $(CLANGPATH)clang
-CFLAGS += -O3 -Os
+CFLAGS += -O3 -Os -DED25519_CUSTOMHASH
 
 AS := $(GCCPATH)arm-none-eabi-gcc
 AFLAGS +=
