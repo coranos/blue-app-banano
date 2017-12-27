@@ -1,2 +1,5 @@
 /bin/
 /Debug/
+/dep/
+/obj/
+/debug/

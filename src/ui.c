@@ -3,6 +3,10 @@
  */
 
 #include "ui.h"
+#include "blake2b.h"
+
+/** the waiting message */
+#define WAITING_MESSAGE "RaiBlocks ready and waiting."
 
 /** default font */
 #define DEFAULT_FONT BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER
@@ -23,12 +27,6 @@ enum UI_STATE uiState;
 
 /** UI state flag */
 ux_state_t ux;
-
-/** notification to restart the hash */
-unsigned char hashTainted;
-
-/** the hash. */
-cx_sha256_t hash;
 
 /** index of the current screen. */
 unsigned int curr_scr_ix;
@@ -79,7 +77,7 @@ static const bagl_element_t bagl_ui_idle_nanos[] = {
 // },
 		{	{	BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 		/* center text */
-		{	{	BAGL_LABELINE, 0x02, 0, 12, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Wake Up, NEO...", 0, 0, 0, NULL, NULL, NULL, },
+		{	{	BAGL_LABELINE, 0x02, 0, 12, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, WAITING_MESSAGE, 0, 0, 0, NULL, NULL, NULL, },
 		/* left icon is a X */
 		{	{	BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 /* */
@@ -92,7 +90,7 @@ static const bagl_element_t bagl_ui_idle_blue[] = {
 	{	{	BAGL_RECTANGLE, 0x00, 0, 60, 320, 420, 0, 0, BAGL_FILL, 0x000000, 0x000000, 0, 0}, NULL, 0, 0, 0, NULL, NULL, NULL,},
 	{	{	BAGL_RECTANGLE, 0x00, 0, 0, 320, 60, 0, 0, BAGL_FILL, 0XFFFFFF, 0XFFFFFF, 0, 0}, NULL, 0, 0, 0, NULL, NULL, NULL,},
 	{	{	BAGL_LABEL, 0x00, 80, 0, 160, 60, 0, 0, BAGL_FILL, 0x000000, 0XFFFFFF, DEFAULT_FONT_BLUE, 0},
-		"Wake Up, NEO...", 0, 0, 0, NULL, NULL, NULL,},
+			WAITING_MESSAGE, 0, 0, 0, NULL, NULL, NULL,},
 	{	{	BAGL_BUTTON | BAGL_FLAG_TOUCHABLE, 0x00, 110, 225, 100, 40, 0, 6, BAGL_FILL, 0XFFFFFF, 0x000000, DEFAULT_FONT_BLUE, 0},
 		"EXIT", 0, 0x37ae99, 0xF9F9F9, io_seproxyhal_touch_exit, NULL, NULL,},
 	/* timer label */
@@ -399,7 +397,6 @@ static const bagl_element_t * tx_desc_up(const bagl_element_t *e) {
 		break;
 
 	default:
-		hashTainted = 1;
 		THROW(0x6D02);
 		break;
 	}
@@ -434,7 +431,6 @@ static const bagl_element_t * tx_desc_dn(const bagl_element_t *e) {
 		break;
 
 	default:
-		hashTainted = 1;
 		THROW(0x6D01);
 		break;
 	}
@@ -448,7 +444,10 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 	if (G_io_apdu_buffer[2] == P1_LAST) {
 		unsigned int raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
 		// Update and sign the hash
-		cx_hash(&hash.header, 0, raw_tx, raw_tx_len_except_bip44, NULL);
+
+		unsigned char hash[HASH_SIZE];
+
+		blake2b(raw_tx,raw_tx_len_except_bip44, hash, HASH_SIZE);
 
 		unsigned char * bip44_in = raw_tx + raw_tx_len_except_bip44;
 
@@ -461,26 +460,21 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 		}
 
 		unsigned char privateKeyData[32];
-		os_perso_derive_node_bip32(CX_CURVE_256R1, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
+		os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
 
 		cx_ecfp_private_key_t privateKey;
-		cx_ecdsa_init_private_key(CX_CURVE_256R1, privateKeyData, 32, &privateKey);
+		cx_ecdsa_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, &privateKey);
 
-		// Hash is finalized, send back the signature
-		unsigned char result[32];
-
-		cx_hash(&hash.header, CX_LAST, G_io_apdu_buffer, 0, result);
-		tx = cx_ecdsa_sign((void*) &privateKey, CX_RND_RFC6979 | CX_LAST, CX_SHA256, result, sizeof(result), G_io_apdu_buffer);
+		tx = cx_ecdsa_sign((void*) &privateKey, CX_RND_TRNG | CX_LAST, CX_NONE, hash, HASH_SIZE, G_io_apdu_buffer);
 		// G_io_apdu_buffer[0] &= 0xF0; // discard the parity information
-		hashTainted = 1;
 		raw_tx_ix = 0;
 		raw_tx_len = 0;
 
 		// add hash to the response, so we can see where the bug is.
 		G_io_apdu_buffer[tx++] = 0xFF;
 		G_io_apdu_buffer[tx++] = 0xFF;
-		for (int ix = 0; ix < 32; ix++) {
-			G_io_apdu_buffer[tx++] = result[ix];
+		for (int ix = 0; ix < HASH_SIZE; ix++) {
+			G_io_apdu_buffer[tx++] = hash[ix];
 		}
 	}
 	G_io_apdu_buffer[tx++] = 0x90;
@@ -494,7 +488,6 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 
 /** deny signing. */
 static const bagl_element_t *io_seproxyhal_touch_deny(const bagl_element_t *e) {
-	hashTainted = 1;
 	raw_tx_ix = 0;
 	raw_tx_len = 0;
 	G_io_apdu_buffer[0] = 0x69;

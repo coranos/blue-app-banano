@@ -13,6 +13,9 @@
 /** the timer */
 extern int exit_timer;
 
+/** the length of the hash */
+#define HASH_SIZE 64
+
 /** max with of timer display */
 #define MAX_TIMER_TEXT_WIDTH 4
 
@@ -73,12 +76,6 @@ extern enum UI_STATE uiState;
 
 /** UI state flag */
 extern ux_state_t ux;
-
-/** notification to restart the hash */
-extern unsigned char hashTainted;
-
-/** the hash. */
-extern cx_sha256_t hash;
 
 /** index of the current screen. */
 extern unsigned int curr_scr_ix;

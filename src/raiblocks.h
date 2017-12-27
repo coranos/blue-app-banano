@@ -2,8 +2,8 @@
  * MIT License, see root folder for full license.
  */
 
-#ifndef NEO_H
-#define NEO_H
+#ifndef RAIBLOCKS_H
+#define RAIBLOCKS_H
 
 #include "os.h"
 #include "cx.h"
@@ -14,4 +14,4 @@
 /** parse the raw transaction in raw_tx and fill up the screens in tx_desc. */
 unsigned char display_tx_desc(void);
 
-#endif // NEO_H
+#endif // RAIBLOCKS_H

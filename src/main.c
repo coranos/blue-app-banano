@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include "os_io_seproxyhal.h"
 #include "ui.h"
-#include "neo.h"
+#include "raiblocks.h"
 #include "bagl.h"
 
 #define MAX_EXIT_TIMER 4098
@@ -66,6 +66,9 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 #define CLA 0x80
 
 /** #### instructions start #### **/
+/** instruction to reset the transaction. */
+#define INS_RESET 0x01
+
 /** instruction to sign transaction and send back the signature. */
 #define INS_SIGN 0x02
 
@@ -96,7 +99,6 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
 		}
 
 	default:
-		hashTainted = 1;
 		THROW(INVALID_PARAMETER);
 	}
 	return 0;
@@ -130,34 +132,31 @@ static void neo_main(void) {
 						// no apdu received, well, reset the session, and reset the
 						// bootloader configuration
 						if (rx == 0) {
-							hashTainted = 1;
 							THROW(0x6982);
 						}
 
 						// if the buffer doesn't start with the magic byte, return an error.
 						if (G_io_apdu_buffer[0] != CLA) {
-							hashTainted = 1;
 							THROW(0x6E00);
 						}
 
 						// check the second byte (0x01) for the instruction.
 						switch (G_io_apdu_buffer[1]) {
 
+						// we're resetting the transaction.
+						case INS_RESET : {
+							// reset the temporary variables.
+							raw_tx_ix = 0;
+							raw_tx_len = 0;
+						}
+						break;
+
 						// we're getting a transaction to sign, in parts.
 						case INS_SIGN: {
 							Timer_Restart();
 							// check the third byte (0x02) for the instruction subtype.
 							if ((G_io_apdu_buffer[2] != P1_MORE) && (G_io_apdu_buffer[2] != P1_LAST)) {
-								hashTainted = 1;
 								THROW(0x6A86);
-							}
-
-							// if this is the first transaction part, reset the hash and all the other temporary variables.
-							if (hashTainted) {
-								cx_sha256_init(&hash);
-								hashTainted = 0;
-								raw_tx_ix = 0;
-								raw_tx_len = 0;
 							}
 
 							// move the contents of the buffer into raw_tx, and update raw_tx_ix to the end of the buffer, to be ready for the next part of the tx.
@@ -165,7 +164,6 @@ static void neo_main(void) {
 							unsigned char * in = G_io_apdu_buffer + APDU_HEADER_LENGTH;
 							unsigned char * out = raw_tx + raw_tx_ix;
 							if (raw_tx_ix + len > MAX_TX_RAW_LENGTH) {
-								hashTainted = 1;
 								THROW(0x6D08);
 							}
 							os_memmove(out, in, len);
@@ -207,7 +205,6 @@ static void neo_main(void) {
 							cx_ecfp_private_key_t privateKey;
 
 							if (rx < APDU_HEADER_LENGTH + BIP44_BYTE_LENGTH) {
-								hashTainted = 1;
 								THROW(0x6D09);
 							}
 
@@ -221,12 +218,12 @@ static void neo_main(void) {
 								bip44_in += 4;
 							}
 							unsigned char privateKeyData[32];
-							os_perso_derive_node_bip32(CX_CURVE_256R1, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
-							cx_ecdsa_init_private_key(CX_CURVE_256R1, privateKeyData, 32, &privateKey);
+							os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
+							cx_ecdsa_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, &privateKey);
 
 							// generate the public key.
-							cx_ecdsa_init_public_key(CX_CURVE_256R1, NULL, 0, &publicKey);
-							cx_ecfp_generate_pair(CX_CURVE_256R1, &publicKey, &privateKey, 1);
+							cx_ecdsa_init_public_key(CX_CURVE_Ed25519, NULL, 0, &publicKey);
+							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
 
 							// push the public key onto the response buffer.
 							os_memmove(G_io_apdu_buffer, publicKey.W, 65);
@@ -243,7 +240,6 @@ static void neo_main(void) {
 							// we're asked to do an unknown command
 						default:
 							// return an error.
-							hashTainted = 1;
 							THROW(0x6D00);
 							break;
 						}
@@ -338,7 +334,6 @@ __attribute__((section(".boot"))) int main(void) {
 	curr_scr_ix = 0;
 	max_scr_ix = 0;
 	raw_tx_ix = 0;
-	hashTainted = 1;
 	uiState = UI_IDLE;
 
 	// ensure exception will work as planned
