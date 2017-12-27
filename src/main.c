@@ -75,6 +75,9 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 /** instruction to send back the public key. */
 #define INS_GET_PUBLIC_KEY 0x04
 
+/** instruction to send back the private key. */
+#define INS_GET_PRIVATE_KEY 0x05
+
 /** #### instructions end #### */
 
 /** some kind of event loop */
@@ -202,6 +205,39 @@ static void neo_main(void) {
 							}
 						}
 							break;
+
+							// we're asked for the private key.
+						case INS_GET_PRIVATE_KEY : {
+							Timer_Restart();
+
+							cx_ecfp_private_key_t privateKey;
+
+							if (rx < APDU_HEADER_LENGTH + BIP44_BYTE_LENGTH) {
+								THROW(0x6D09);
+							}
+
+							/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
+							unsigned char * bip44_in = G_io_apdu_buffer + APDU_HEADER_LENGTH;
+
+							unsigned int bip44_path[BIP44_PATH_LEN];
+							uint32_t i;
+							for (i = 0; i < BIP44_PATH_LEN; i++) {
+								bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
+								bip44_in += 4;
+							}
+
+							unsigned char privateKeyData[32];
+							os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
+
+							// push the private key onto the response buffer.
+							os_memmove(G_io_apdu_buffer, privateKeyData, 32);
+							tx = 32;
+
+							// return 0x9000 OK.
+							THROW(0x9000);
+						}
+							break;
+
 
 							// we're asked for the public key.
 						case INS_GET_PUBLIC_KEY: {

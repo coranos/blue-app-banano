@@ -39,6 +39,10 @@ print "STARTED resetStatus "
 resetStatus = dongle.exchange(bytes(("80030000FF"+ bipp44_path).decode('hex')))
 print "SUCCESS resetStatus " + str(resetStatus).encode('hex')
 
+print "STARTED privateKey "
+publicKey = dongle.exchange(bytes(("80050000FF"+ bipp44_path).decode('hex')))
+print "SUCCESS privateKey " + str(publicKey).encode('hex')
+
 print "STARTED publicKey "
 publicKey = dongle.exchange(bytes(("80040000FF"+ bipp44_path).decode('hex')))
 print "SUCCESS publicKey " + str(publicKey).encode('hex')
