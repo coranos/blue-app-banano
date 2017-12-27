@@ -28,9 +28,9 @@ APP_LOAD_PARAMS = --path "44'/888'" --appFlags 0x40 --apdu $(COMMON_LOAD_PARAMS)
 APP_DELETE_PARAMS =  --apdu $(COMMON_DELETE_PARAMS)
 
 ifeq ($(TARGET_NAME),TARGET_BLUE)
-ICONNAME=icon_blue.gif
+ICONNAME=/Users/dps/docker-shared/ledger-nano-s/blue-app-raiblocks/icon_blue_raiblocks.gif
 else
-ICONNAME=icon_nano.gif
+ICONNAME=/Users/dps/docker-shared/ledger-nano-s/blue-app-raiblocks/icon_nano_raiblocks.gif
 endif
 
 # Build configuration

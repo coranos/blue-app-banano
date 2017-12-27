@@ -6,7 +6,7 @@
 #include "blake2b.h"
 
 /** the waiting message */
-#define WAITING_MESSAGE "RaiBlocks ready and waiting."
+#define WAITING_MESSAGE "RaiBlocks ready."
 
 /** default font */
 #define DEFAULT_FONT BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER

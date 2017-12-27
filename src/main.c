@@ -145,9 +145,14 @@ static void neo_main(void) {
 
 						// we're resetting the transaction.
 						case INS_RESET : {
+							Timer_Restart();
+
 							// reset the temporary variables.
 							raw_tx_ix = 0;
 							raw_tx_len = 0;
+
+							// return 0x9000 OK.
+							THROW(0x9000);
 						}
 						break;
 
