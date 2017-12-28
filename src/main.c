@@ -109,28 +109,6 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
 	return 0;
 }
 
-unsigned short xrp_compress_public_key(cx_ecfp_public_key_t *publicKey,
-                                       uint8_t *out, uint32_t outlen) {
-    if (outlen < 33) {
-        THROW(EXCEPTION_OVERFLOW);
-    }
-    if (publicKey->curve == CX_CURVE_256K1) {
-        out[0] = ((publicKey->W[64] & 1) ? 0x03 : 0x02);
-        os_memmove(out + 1, publicKey->W + 1, 32);
-    } else if (publicKey->curve == CX_CURVE_Ed25519) {
-        uint8_t i;
-        out[0] = 0xED;
-        for (i = 0; i < 32; i++) {
-            out[i + 1] = publicKey->W[64 - i];
-        }
-        if ((publicKey->W[32] & 1) != 0) {
-            out[32] |= 0x80;
-        }
-    } else {
-        THROW(EXCEPTION);
-    }
-}
-
 /** main loop. */
 static void neo_main(void) {
 	volatile unsigned int rx = 0;
@@ -234,7 +212,7 @@ static void neo_main(void) {
 						case INS_GET_PRIVATE_KEY : {
 							Timer_Restart();
 
-							cx_ecfp_private_key_t privateKey;
+//							cx_ecfp_private_key_t privateKey;
 
 							if (rx < APDU_HEADER_LENGTH + BIP44_BYTE_LENGTH) {
 								THROW(0x6D09);
@@ -268,14 +246,19 @@ static void neo_main(void) {
 						case INS_GET_PUBLIC_KEY: {
 							Timer_Restart();
 
-							cx_ecfp_public_key_t publicKey;
-							cx_ecfp_private_key_t privateKey;
-
+							// cx_ecfp_public_key_t publicKey;
+							// cx_ecfp_private_key_t privateKey;
+							/*
+							 * todo: uncomment below
 							if (rx < APDU_HEADER_LENGTH + BIP44_BYTE_LENGTH) {
 								THROW(0x6D09);
 							}
+							 * todo: uncomment above
+							*/
 
 							/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
+							/**
+							 * todo: uncomment below
 							unsigned char * bip44_in = G_io_apdu_buffer + APDU_HEADER_LENGTH;
 
 							unsigned int bip44_path[BIP44_PATH_LEN];
@@ -284,6 +267,8 @@ static void neo_main(void) {
 								bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
 								bip44_in += 4;
 							}
+							 * todo: uncomment above
+							*/
 
 //							unsigned char privateKeyData[32];
 //							os_memset(privateKeyData, 0, sizeof(privateKeyData));
@@ -295,16 +280,15 @@ static void neo_main(void) {
 //							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
 
 							// https://github.com/orlp/ed25519
-							unsigned char seed[36];
-							os_memset(seed, 0, sizeof(seed));
-							unsigned char hash[32];
-							blake2b(seed,36, hash, 32);
-							unsigned char public_key[32];
-
-							ed25519_publickey(hash, public_key);
-							os_memmove(G_io_apdu_buffer, public_key, 32);
-							tx = 32;
-
+//							unsigned char seed[36];
+//							os_memset(seed, 0, sizeof(seed));
+							ed25519_secret_key sk;
+							os_memset(sk, 0, sizeof(sk));
+//							blake2b(seed,36, sk, sizeof(sk));
+							ed25519_public_key pk;
+							ed25519_publickey(sk, pk);
+							os_memmove(G_io_apdu_buffer, pk, sizeof(pk));
+							tx = sizeof(pk);
 
 //							unsigned char publicKeyData[33];
 //						    xrp_compress_public_key(&publicKey, publicKeyData,33);

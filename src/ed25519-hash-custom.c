@@ -10,5 +10,8 @@
 //}
 
 void ed25519_hash(uint8_t *hash, const uint8_t *in, size_t inlen){
+//	cx_hash_sha512(in, inlen,hash);
 	blake2b(in, inlen,hash, 32);
+
+//	blake2b(hash, 32, in, inlen,NULL,0);
 }

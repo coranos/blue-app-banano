@@ -5,6 +5,8 @@
 #ifndef ED25519_HASH_CUSTOM_H
 #define ED25519_HASH_CUSTOM_H
 
+//#include "os.h"
+//#include "cx.h"
 #include "blake2b.h"
 
 typedef struct __blake2b_state ed25519_hash_context;
