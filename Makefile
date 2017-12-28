@@ -36,7 +36,7 @@ endif
 # Build configuration
 
 APP_SOURCE_PATH += src
-APP_SOURCE_PATH += blake2b_src
+APP_SOURCE_PATH += blake2_src
 APP_SOURCE_PATH += ed25519_src
 SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
