@@ -3,7 +3,7 @@
  */
 
 #include "ui.h"
-#include "blake2b.h"
+#include "ed25519.h"
 
 /** the waiting message */
 #define WAITING_MESSAGE "RaiBlocks ready."
@@ -447,7 +447,7 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 
 		unsigned char hash[HASH_SIZE];
 
-		blake2b(raw_tx,raw_tx_len_except_bip44,hash, HASH_SIZE);
+//		blake2b(raw_tx,raw_tx_len_except_bip44,hash, HASH_SIZE);
 //		blake2b(hash, HASH_SIZE,raw_tx,raw_tx_len_except_bip44, NULL, 0);
 
 		unsigned char * bip44_in = raw_tx + raw_tx_len_except_bip44;
@@ -460,33 +460,15 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 			bip44_in += 4;
 		}
 
-		unsigned char privateKeyData[32];
-		os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
+		ed25519_secret_key sk;
+		os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, sk, NULL);
+		ed25519_public_key pk;
+		ed25519_publickey(sk, pk);
 
-		cx_ecfp_private_key_t privateKey;
-		cx_ecdsa_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, &privateKey);
-
-		BEGIN_TRY
-		{
-			TRY
-			{
-				tx = cx_ecdsa_sign((void*) &privateKey, CX_LAST, CX_NONE, hash, HASH_SIZE, G_io_apdu_buffer);
-			}
-			CATCH_OTHER(e)
-			{
-				G_io_apdu_buffer[tx++] = e >> 8;
-				G_io_apdu_buffer[tx++] = e;
-				tx += 2;
-				io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
-				ui_idle();
-				return 0;
-			}
-			FINALLY
-			{
-			}
-		}
-		END_TRY;
-
+		ed25519_signature sig;
+		ed25519_sign(raw_tx, raw_tx_len_except_bip44, pk, sk, sig);
+		os_memmove(G_io_apdu_buffer, sig, sizeof(sig));
+		tx = sizeof(sig);
 
 		// G_io_apdu_buffer[0] &= 0xF0; // discard the parity information
 		raw_tx_ix = 0;

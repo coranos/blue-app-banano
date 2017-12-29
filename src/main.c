@@ -246,19 +246,11 @@ static void neo_main(void) {
 						case INS_GET_PUBLIC_KEY: {
 							Timer_Restart();
 
-							// cx_ecfp_public_key_t publicKey;
-							// cx_ecfp_private_key_t privateKey;
-							/*
-							 * todo: uncomment below
 							if (rx < APDU_HEADER_LENGTH + BIP44_BYTE_LENGTH) {
 								THROW(0x6D09);
 							}
-							 * todo: uncomment above
-							*/
 
 							/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
-							/**
-							 * todo: uncomment below
 							unsigned char * bip44_in = G_io_apdu_buffer + APDU_HEADER_LENGTH;
 
 							unsigned int bip44_path[BIP44_PATH_LEN];
@@ -267,24 +259,12 @@ static void neo_main(void) {
 								bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
 								bip44_in += 4;
 							}
-							 * todo: uncomment above
-							*/
 
-//							unsigned char privateKeyData[32];
-//							os_memset(privateKeyData, 0, sizeof(privateKeyData));
-							//os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
-//							cx_ecdsa_init_private_key(CX_CURVE_Ed25519, privateKeyData, 32, &privateKey);
 
-							// generate the public key.
-//							cx_ecdsa_init_public_key(CX_CURVE_Ed25519, NULL, 0, &publicKey);
-//							cx_ecfp_generate_pair(CX_CURVE_Ed25519, &publicKey, &privateKey, 1);
 
 							// https://github.com/orlp/ed25519
-//							unsigned char seed[36];
-//							os_memset(seed, 0, sizeof(seed));
 							ed25519_secret_key sk;
-							os_memset(sk, 0, sizeof(sk));
-//							blake2b(seed,36, sk, sizeof(sk));
+							os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, sk, NULL);
 							ed25519_public_key pk;
 							ed25519_publickey(sk, pk);
 							os_memmove(G_io_apdu_buffer, pk, sizeof(pk));

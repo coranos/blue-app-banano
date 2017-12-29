@@ -40,15 +40,19 @@ resetStatus = dongle.exchange(bytes(("80030000FF"+ bipp44_path).decode('hex')))
 print "SUCCESS resetStatus " + str(resetStatus).encode('hex')
 
 print "STARTED privateKey "
-publicKey = dongle.exchange(bytes(("80050000FF"+ bipp44_path).decode('hex')))
-print "SUCCESS privateKey " + str(publicKey).encode('hex')
-print "EXPECT  privateKey " + "0000000000000000000000000000000000000000000000000000000000000000"
-#print "EXPECT  privateKey " + "17799D6ED28AB940A23B04C2EAE5CA393FACE3C79ABB84B8C5F9069C697D25A4"
+privateKey = dongle.exchange(bytes(("80050000FF"+ bipp44_path).decode('hex')))
+actualPrivateKey = str(privateKey).encode('hex').upper()
+#expectPrivateKey = "0000000000000000000000000000000000000000000000000000000000000000"
+expectPrivateKey = "17799D6ED28AB940A23B04C2EAE5CA393FACE3C79ABB84B8C5F9069C697D25A4"
+print "ACTUAL privateKey " + actualPrivateKey
+print "EXPECT privateKey " + expectPrivateKey
+print "MATCH? privateKey " + str(actualPrivateKey == expectPrivateKey)
 
 print "STARTED publicKey "
 publicKey = dongle.exchange(bytes(("80040000FF"+ bipp44_path).decode('hex')))
 actualPublicKey = str(publicKey).encode('hex').upper()
-expectPublicKey = "19D3D919475DEED4696B5D13018151D1AF88B2BD3BCFF048B45031C1F36D1858"
+#expectPublicKey = "19D3D919475DEED4696B5D13018151D1AF88B2BD3BCFF048B45031C1F36D1858"
+expectPublicKey = "F1B8607D09CDD020D5B6EF20B8B345AFD69BE4E6577A10733293F1359AB26A6F"
 print "ACTUAL publicKey " + actualPublicKey
 print "EXPECT publicKey " + expectPublicKey
 print "MATCH? publicKey " + str(actualPublicKey == expectPublicKey)
