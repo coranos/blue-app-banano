@@ -17,9 +17,9 @@ This is the community edition of the Ledger Nano S app for the RaiBlocks Cryptoc
 
 2. develop light wallet that connects to both RaiBlocks RPC and Ledger Nano S / Ledger Blue (development in progress)
 
-[ledger-wallet-raiblocks](https://github.com/coranos/ledger-wallet-raiblocks)
+   [ledger-wallet-raiblocks](https://github.com/coranos/ledger-wallet-raiblocks)
 
-ETA: Early February.
+   ETA: Early February.
 
 3. integration test light wallet with RPC and Ledger Nano S. (not started)
 
