@@ -4,6 +4,7 @@ This is the community edition of the Ledger Nano S app for the RaiBlocks Cryptoc
 
 # roadmap
 1. develop ledger nano s app (development complete)
+
     1.1. test ledger blue port of ledger nano app  (development complete)
 
     1.2. get someone to pay for the Ledger Nano app to be listed on Ledger's store (not started)
