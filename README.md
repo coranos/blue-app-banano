@@ -12,11 +12,13 @@ This is the community edition of the Ledger Nano S app for the RaiBlocks Cryptoc
     
    **ETA: Unknown.**
    
+   
 
    1.3. get someone to pay for the Ledger Blue app to be listed on Ledger's store (not started)
     
    **ETA: Unknown.**
    
+
 
 2. develop light wallet that connects to both RaiBlocks RPC and Ledger Nano S / Ledger Blue (development in progress)
 
@@ -24,15 +26,18 @@ This is the community edition of the Ledger Nano S app for the RaiBlocks Cryptoc
 
    **ETA: Early February.**
    
+   
 
 3. integration test light wallet with RPC and Ledger Nano S. (not started)
 
    **ETA: Late February.**
    
 
+
    3.1. integration test light wallet with RPC and Ledger Nano S. (not started)
     
    **ETA: Late February.**
+   
    
 
 # development

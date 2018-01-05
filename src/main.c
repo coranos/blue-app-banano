@@ -229,8 +229,8 @@ static void neo_main(void) {
 							}
 
 							unsigned char privateKeyData[32];
-							os_memset(privateKeyData, 0, sizeof(privateKeyData));
-							//os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
+							//os_memset(privateKeyData, 0, sizeof(privateKeyData));
+							os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
 
 							// push the private key onto the response buffer.
 							os_memmove(G_io_apdu_buffer, privateKeyData, 32);
