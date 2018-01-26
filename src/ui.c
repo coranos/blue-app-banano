@@ -443,12 +443,6 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 
 	if (G_io_apdu_buffer[2] == P1_LAST) {
 		unsigned int raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
-		// Update and sign the hash
-
-		unsigned char hash[HASH_SIZE];
-
-//		blake2b(raw_tx,raw_tx_len_except_bip44,hash, HASH_SIZE);
-//		blake2b(hash, HASH_SIZE,raw_tx,raw_tx_len_except_bip44, NULL, 0);
 
 		unsigned char * bip44_in = raw_tx + raw_tx_len_except_bip44;
 
@@ -470,16 +464,8 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 		os_memmove(G_io_apdu_buffer, sig, sizeof(sig));
 		tx = sizeof(sig);
 
-		// G_io_apdu_buffer[0] &= 0xF0; // discard the parity information
 		raw_tx_ix = 0;
 		raw_tx_len = 0;
-
-		// add hash to the response, so we can see where the bug is.
-		G_io_apdu_buffer[tx++] = 0xFF;
-		G_io_apdu_buffer[tx++] = 0xFF;
-		for (int ix = 0; ix < HASH_SIZE; ix++) {
-			G_io_apdu_buffer[tx++] = hash[ix];
-		}
 	}
 	G_io_apdu_buffer[tx++] = 0x90;
 	G_io_apdu_buffer[tx++] = 0x00;

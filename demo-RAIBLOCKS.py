@@ -21,7 +21,7 @@ from secp256k1 import PublicKey
 
 bipp44_path = (
                "8000002C"
-              +"80000378"
+              +"800000a5"
               +"80000000"
               +"80000000"
               +"80000000")
@@ -29,21 +29,20 @@ bipp44_path = (
 # sending to AHXSMB19pWytwJ7vzvCw5aWmd1DUniDKRT
 
 # blank tx
-textToSign_01 = bytes(("0000" + bipp44_path + "").decode('hex'))
+textToSign_01 = bytes(("80028000744284F08CA8FE206FE6854E21AA69163FEAFAE248F0A8D53E4FAE700B26122B613FE80B4BC842E82C1C18ABFEEC47EA989E63953BC82AC411F304D13833D52A560ad1d5cb2db69bfe31560ed1909135d6d5fa6a471d35fd9b1424c84ca68b9c40" + bipp44_path + "").decode('hex'))
 
 textToSignArray = [textToSign_01]
 
 dongle = getDongle(True)
 
 print "STARTED resetStatus "
-resetStatus = dongle.exchange(bytes(("80030000FF"+ bipp44_path).decode('hex')))
+resetStatus = dongle.exchange(bytes(("80030000FF").decode('hex')))
 print "SUCCESS resetStatus " + str(resetStatus).encode('hex')
 
 print "STARTED privateKey "
 privateKey = dongle.exchange(bytes(("80050000FF"+ bipp44_path).decode('hex')))
 actualPrivateKey = str(privateKey).encode('hex').upper()
-#expectPrivateKey = "0000000000000000000000000000000000000000000000000000000000000000"
-expectPrivateKey = "17799D6ED28AB940A23B04C2EAE5CA393FACE3C79ABB84B8C5F9069C697D25A4"
+expectPrivateKey = "55BCF45FFD718D8939FB798AAD5B5C8C55D3F08E42507D0D8479F50AB648639E"
 print "ACTUAL privateKey " + actualPrivateKey
 print "EXPECT privateKey " + expectPrivateKey
 print "MATCH? privateKey " + str(actualPrivateKey == expectPrivateKey)
@@ -51,8 +50,7 @@ print "MATCH? privateKey " + str(actualPrivateKey == expectPrivateKey)
 print "STARTED publicKey "
 publicKey = dongle.exchange(bytes(("80040000FF"+ bipp44_path).decode('hex')))
 actualPublicKey = str(publicKey).encode('hex').upper()
-#expectPublicKey = "19D3D919475DEED4696B5D13018151D1AF88B2BD3BCFF048B45031C1F36D1858"
-expectPublicKey = "F1B8607D09CDD020D5B6EF20B8B345AFD69BE4E6577A10733293F1359AB26A6F"
+expectPublicKey = "0AD1D5CB2DB69BFE31560ED1909135D6D5FA6A471D35FD9B1424C84CA68B9C40"
 print "ACTUAL publicKey " + actualPublicKey
 print "EXPECT publicKey " + expectPublicKey
 print "MATCH? publicKey " + str(actualPublicKey == expectPublicKey)
