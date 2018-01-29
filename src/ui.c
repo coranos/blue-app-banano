@@ -3,7 +3,6 @@
  */
 
 #include "ui.h"
-#include "ed25519.h"
 
 /** the waiting message */
 #define WAITING_MESSAGE "RaiBlocks ready."
@@ -42,6 +41,9 @@ unsigned int raw_tx_ix;
 
 /** current length of raw transaction. */
 unsigned int raw_tx_len;
+
+/** ed25519 signature */
+ed25519_signature sig;
 
 /** all text descriptions. */
 char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
@@ -442,27 +444,8 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 	unsigned int tx = 0;
 
 	if (G_io_apdu_buffer[2] == P1_LAST) {
-		unsigned int raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
-
-		unsigned char * bip44_in = raw_tx + raw_tx_len_except_bip44;
-
-		/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
-		unsigned int bip44_path[BIP44_PATH_LEN];
-		uint32_t i;
-		for (i = 0; i < BIP44_PATH_LEN; i++) {
-			bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
-			bip44_in += 4;
-		}
-
-		ed25519_secret_key sk;
-		os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, sk, NULL);
-		ed25519_public_key pk;
-		ed25519_publickey(sk, pk);
-
-		ed25519_signature sig;
-		ed25519_sign(raw_tx, raw_tx_len_except_bip44, pk, sk, sig);
-		os_memmove(G_io_apdu_buffer, sig, sizeof(sig));
-		tx = sizeof(sig);
+//		os_memmove(G_io_apdu_buffer, sig, sizeof(sig));
+//		tx = sizeof(sig);
 
 		raw_tx_ix = 0;
 		raw_tx_len = 0;

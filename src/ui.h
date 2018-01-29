@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include "os_io_seproxyhal.h"
 #include "bagl.h"
+#include "ed25519.h"
 
 /** the timer */
 extern int exit_timer;
@@ -91,6 +92,9 @@ extern unsigned int raw_tx_ix;
 
 /** current length of raw transaction. */
 extern unsigned int raw_tx_len;
+
+/** ed25519 signature */
+extern ed25519_signature sig;
 
 /** all text descriptions. */
 extern char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];

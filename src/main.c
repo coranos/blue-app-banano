@@ -155,7 +155,6 @@ static void neo_main(void) {
 							// reset the temporary variables.
 							raw_tx_ix = 0;
 							raw_tx_len = 0;
-							tx = 0;
 
 							// return 0x9000 OK.
 							THROW(0x9000);
@@ -193,6 +192,24 @@ static void neo_main(void) {
 
 								// parse the transaction into human readable text.
 								display_tx_desc();
+
+//								// sign the transaction
+								unsigned int raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
+								unsigned char * bip44_in = raw_tx + raw_tx_len_except_bip44;
+//								// BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32.
+								unsigned int bip44_path[BIP44_PATH_LEN];
+								uint32_t i;
+								for (i = 0; i < BIP44_PATH_LEN; i++) {
+									bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
+									bip44_in += 4;
+								}
+
+								ed25519_secret_key sk;
+								os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, sk, NULL);
+								ed25519_public_key pk;
+								ed25519_publickey(sk, pk);
+//								ed25519_sign(raw_tx, raw_tx_len_except_bip44, pk, sk, sig);
+
 
 								// display the UI, starting at the top screen which is "Sign Tx Now".
 								ui_top_sign();
