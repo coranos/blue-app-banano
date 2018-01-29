@@ -1,6 +1,6 @@
-# blue-app-raiblocks CE
+# blue-app-banano CE
 
-This is the community edition of the Ledger Nano S app for the RaiBlocks Cryptocoin.
+This is the community edition of the Ledger Nano S app for the banano Cryptocoin.
 
 # roadmap
 1. develop ledger nano s app (development complete)
@@ -20,9 +20,9 @@ This is the community edition of the Ledger Nano S app for the RaiBlocks Cryptoc
    
 
 
-2. develop light wallet that connects to both RaiBlocks RPC and Ledger Nano S / Ledger Blue (development in progress)
+2. develop light wallet that connects to both Banano RPC and Ledger Nano S / Ledger Blue (development in progress)
 
-   [ledger-wallet-raiblocks](https://github.com/coranos/ledger-wallet-raiblocks)
+   [ledger-wallet-banano](https://github.com/coranos/ledger-wallet-banano)
 
    **ETA: Early February.**
    
@@ -44,5 +44,8 @@ This is the community edition of the Ledger Nano S app for the RaiBlocks Cryptoc
 
 Run `make load` to build and load the application onto the device.
 
-After installing and running the application, you can run `python demo-RAIBLOCKS.py` to test signing several transactions over USB.
+After installing and running the application, you can run `python demo-BANANO.py` to test signing several transactions over USB.
 
+changed 
+	/usr/local/lib/python3.5/dist-packages/ledgerblue/hexParser.py
+	

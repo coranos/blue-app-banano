@@ -22,8 +22,8 @@
 #include "ed25519.h"
 #include "os_io_seproxyhal.h"
 #include "ui.h"
-#include "raiblocks.h"
 #include "bagl.h"
+#include "banano.h"
 
 #define MAX_EXIT_TIMER 4098
 

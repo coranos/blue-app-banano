@@ -22,15 +22,15 @@ include $(BOLOS_SDK)/Makefile.defines
 
 # Main app configuration
 
-APPNAME = "RaiBlocks"
+APPNAME = "Banano"
 APPVERSION = 1.0.0
 APP_LOAD_PARAMS = --path "44'/165'" --appFlags 0x40 --apdu --curve ed25519 $(COMMON_LOAD_PARAMS)
 APP_DELETE_PARAMS =  --apdu $(COMMON_DELETE_PARAMS)
 
 ifeq ($(TARGET_NAME),TARGET_BLUE)
-ICONNAME=/Users/dps/docker-shared/ledger-nano-s/blue-app-raiblocks/icon_blue_raiblocks.gif
+ICONNAME=icon_blue.gif
 else
-ICONNAME=/Users/dps/docker-shared/ledger-nano-s/blue-app-raiblocks/icon_nano_raiblocks.gif
+ICONNAME=icon.gif
 endif
 
 # Build configuration

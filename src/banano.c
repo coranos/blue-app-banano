@@ -1,7 +1,7 @@
 /*
  * MIT License, see root folder for full license.
  */
-#include "raiblocks.h"
+#include "banano.h"
 
 /** MAX_TX_TEXT_WIDTH in blanks, used for clearing a line of text */
 static const char TXT_BLANK[] = "                 ";
