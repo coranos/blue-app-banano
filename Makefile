@@ -67,7 +67,7 @@ $(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
 endif
 
 CC := $(CLANGPATH)clang
-CFLAGS += -O3 -Os -DED25519_CUSTOMHASH
+CFLAGS += -O3 -Os -DED25519_CUSTOMHASH -DED25519_INLINE_ASM -DED25519_TEST
 
 AS := $(GCCPATH)arm-none-eabi-gcc
 AFLAGS +=

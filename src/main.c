@@ -190,11 +190,11 @@ static void neo_main(void) {
 								raw_tx_len = raw_tx_ix;
 								raw_tx_ix = 0;
 
-								// parse the transaction into human readable text.
-								display_tx_desc();
+//								 parse the transaction into human readable text.
+//								display_tx_desc();
 
 //								// sign the transaction
-								unsigned int raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
+								size_t raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
 								unsigned char * bip44_in = raw_tx + raw_tx_len_except_bip44;
 //								// BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32.
 								unsigned int bip44_path[BIP44_PATH_LEN];
@@ -208,20 +208,25 @@ static void neo_main(void) {
 								os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, sk, NULL);
 								ed25519_public_key pk;
 								ed25519_publickey(sk, pk);
-//								ed25519_sign(raw_tx, raw_tx_len_except_bip44, pk, sk, sig);
+								ed25519_sign(raw_tx, raw_tx_len_except_bip44, sk, pk, sig);
 
+								os_memmove(G_io_apdu_buffer, sig, sizeof(sig));
+								tx = sizeof(sig);
 
 								// display the UI, starting at the top screen which is "Sign Tx Now".
-								ui_top_sign();
+//								ui_top_sign();
 							}
 
-							flags |= IO_ASYNCH_REPLY;
+//							flags |= IO_ASYNCH_REPLY;
+//
+//							// if this is not the last part of the transaction, do not display the UI, and approve the partial transaction.
+//							// this adds the TX to the hash.
+//							if (G_io_apdu_buffer[2] == P1_MORE) {
+//								io_seproxyhal_touch_approve(NULL);
+//							}
 
-							// if this is not the last part of the transaction, do not display the UI, and approve the partial transaction.
-							// this adds the TX to the hash.
-							if (G_io_apdu_buffer[2] == P1_MORE) {
-								io_seproxyhal_touch_approve(NULL);
-							}
+							// return 0x9000 OK.
+							THROW(0x9000);
 						}
 							break;
 
