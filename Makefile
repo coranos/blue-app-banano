@@ -76,6 +76,8 @@ LD := $(GCCPATH)arm-none-eabi-gcc
 LDFLAGS += -O3 -Os
 LDLIBS += -lm -lgcc -lc
 
+include $(BOLOS_SDK)/Makefile.glyphs
+
 # Main rules
 
 all: default

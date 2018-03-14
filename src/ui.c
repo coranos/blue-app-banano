@@ -3,9 +3,10 @@
  */
 
 #include "ui.h"
+#include "glyphs.h"
 
 /** the waiting message */
-#define WAITING_MESSAGE "RaiBlocks ready."
+#define WAITING_MESSAGE "Bananos Nano S Is Ready."
 
 /** default font */
 #define DEFAULT_FONT BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER
@@ -78,6 +79,8 @@ static const bagl_element_t bagl_ui_idle_nanos[] = {
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
 		{	{	BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+		/* bananos icon */
+		{	{	BAGL_ICON, 0x00, 0, 0, 104, 32, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, &C_icon_banana, 0, 0, 0, NULL, NULL, NULL, },
 		/* center text */
 		{	{	BAGL_LABELINE, 0x02, 0, 12, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, WAITING_MESSAGE, 0, 0, 0, NULL, NULL, NULL, },
 		/* left icon is a X */
