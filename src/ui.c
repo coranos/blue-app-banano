@@ -6,7 +6,7 @@
 #include "glyphs.h"
 
 /** the waiting message */
-#define WAITING_MESSAGE "Bananos Nano S Is Ready."
+#define WAITING_MESSAGE "Bananos..."
 
 /** default font */
 #define DEFAULT_FONT BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER
@@ -80,9 +80,9 @@ static const bagl_element_t bagl_ui_idle_nanos[] = {
 // },
 		{	{	BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 		/* bananos icon */
-		{	{	BAGL_ICON, 0x00, 0, 0, 104, 32, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, &C_icon_banana, 0, 0, 0, NULL, NULL, NULL, },
+		{	{	BAGL_ICON, 0x00, 40, 14, 104, 32, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&C_icon_banana, 0, 0, 0, NULL, NULL, NULL, },
 		/* center text */
-		{	{	BAGL_LABELINE, 0x02, 0, 12, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, WAITING_MESSAGE, 0, 0, 0, NULL, NULL, NULL, },
+		{	{	BAGL_LABELINE, 0x00, 0, 12, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, WAITING_MESSAGE, 0, 0, 0, NULL, NULL, NULL, },
 		/* left icon is a X */
 		{	{	BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 /* */
@@ -447,8 +447,8 @@ const bagl_element_t*io_seproxyhal_touch_approve(const bagl_element_t *e) {
 	unsigned int tx = 0;
 
 	if (G_io_apdu_buffer[2] == P1_LAST) {
-//		os_memmove(G_io_apdu_buffer, sig, sizeof(sig));
-//		tx = sizeof(sig);
+		os_memmove(G_io_apdu_buffer, sig, sizeof(sig));
+		tx = sizeof(sig);
 
 		raw_tx_ix = 0;
 		raw_tx_len = 0;

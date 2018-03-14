@@ -1,7 +1,7 @@
 #ifndef GLYPH_icon_banana_BPP
-#define GLYPH_icon_banana_WIDTH 104
-#define GLYPH_icon_banana_HEIGHT 32
-#define GLYPH_icon_banana_BPP 2
+#define GLYPH_icon_banana_WIDTH 52
+#define GLYPH_icon_banana_HEIGHT 16
+#define GLYPH_icon_banana_BPP 1
 extern
 unsigned int const C_icon_banana_colors[]
 ;
