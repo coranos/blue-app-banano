@@ -59,7 +59,7 @@ char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 char curr_tx_desc[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 
 /** currently displayed public key */
-bagl_icon_details_t current_public_key[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
+bagl_icon_details_t current_public_key[MAX_TX_ICON_LINES][MAX_TX_ICON_WIDTH];
 
 /** UI was touched indicating the user wants to exit the app */
 static const bagl_element_t * io_seproxyhal_touch_exit(const bagl_element_t *e);
@@ -142,7 +142,7 @@ static const bagl_element_t bagl_ui_public_key_nanos[] = {
 // },
 		{	{	BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 		/* first line of description of current public key */
-//		{	{	BAGL_ICON, 0x00, 40, 14, 104, 32, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][0], 0, 0, 0, NULL, NULL, NULL, },
+		{	{	BAGL_ICON, 0x00, 40, 14, 104, 32, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][0], 0, 0, 0, NULL, NULL, NULL, },
 //		{	{	BAGL_ICON, 0x00, 45, 14, 104, 32, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][1], 0, 0, 0, NULL, NULL, NULL, },
 //		{	{	BAGL_LABELINE, 0x02, 10, 10, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, (const char *)&current_public_key[0][1], 0, 0, 0, NULL, NULL, NULL, },
 		/* second line of description of current public key */
@@ -154,7 +154,7 @@ static const bagl_element_t bagl_ui_public_key_nanos[] = {
 //		{	{	BAGL_LABELINE, 0x02, 10, 32, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, (const char *)&current_public_key[2][1], 0, 0, 0, NULL, NULL, NULL, },
 //		{	{	BAGL_LABELINE, 0x02, 10, 32, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, (const char *)&current_public_key[2][2], 0, 0, 0, NULL, NULL, NULL, },
 		/* right icon is a X */
-//		{	{	BAGL_ICON, 0x00, 113, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+		{	{	BAGL_ICON, 0x00, 113, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 /* */
 };
 /**

@@ -50,7 +50,7 @@ extern char timer_desc[MAX_TIMER_TEXT_WIDTH];
  * So we can only display 10 screens of data, and can only sign transactions up to 1kb in size.
  * max size of a transaction, binary will not compile if we try to allow transactions over 1kb.
  */
-#define MAX_TX_RAW_LENGTH 1024
+#define MAX_TX_RAW_LENGTH 217
 
 /** max width of a single line of text. */
 #define MAX_TX_TEXT_WIDTH 18
@@ -58,8 +58,14 @@ extern char timer_desc[MAX_TIMER_TEXT_WIDTH];
 /** max lines of text to display. */
 #define MAX_TX_TEXT_LINES 3
 
+/** max width of a single line of iconified text. */
+#define MAX_TX_ICON_WIDTH 21
+
+/** max lines of iconified text to display. */
+#define MAX_TX_ICON_LINES 3
+
 /** max number of screens to display. */
-#define MAX_TX_TEXT_SCREENS 10
+#define MAX_TX_TEXT_SCREENS 1
 
 /** max number of hex bytes that can be displayed (2 hex characters for 1 byte of data) */
 #define MAX_HEX_BUFFER_LEN (MAX_TX_TEXT_WIDTH / 2)
@@ -108,7 +114,8 @@ extern char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 /** currently displayed text description. */
 extern char curr_tx_desc[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 
-extern bagl_icon_details_t current_public_key[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
+/** currently displayed public key */
+extern bagl_icon_details_t current_public_key[MAX_TX_ICON_LINES][MAX_TX_ICON_WIDTH];
 
 /** process a partial transaction */
 const bagl_element_t * io_seproxyhal_touch_approve(const bagl_element_t *e);
