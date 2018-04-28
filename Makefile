@@ -24,8 +24,10 @@ include $(BOLOS_SDK)/Makefile.defines
 
 APPNAME = "Banano"
 APPVERSION = 1.0.0
-APP_LOAD_PARAMS = --path "44'/165'" --appFlags 0x40 --apdu --curve ed25519 $(COMMON_LOAD_PARAMS)
-APP_DELETE_PARAMS =  --apdu $(COMMON_DELETE_PARAMS)
+#APP_LOAD_PARAMS = --path "44'/165'" --appFlags 0x40 --apdu --curve ed25519 $(COMMON_LOAD_PARAMS)
+#APP_DELETE_PARAMS =  --apdu $(COMMON_DELETE_PARAMS)
+APP_LOAD_PARAMS = --path "44'/165'" --appFlags 0x40 --curve ed25519 $(COMMON_LOAD_PARAMS)
+APP_DELETE_PARAMS =  $(COMMON_DELETE_PARAMS)
 
 ifeq ($(TARGET_NAME),TARGET_BLUE)
 ICONNAME=icon_blue.gif

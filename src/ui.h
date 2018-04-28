@@ -108,8 +108,7 @@ extern char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 /** currently displayed text description. */
 extern char curr_tx_desc[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 
-/** currently displayed public key */
-extern char current_public_key[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
+extern bagl_icon_details_t current_public_key[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 
 /** process a partial transaction */
 const bagl_element_t * io_seproxyhal_touch_approve(const bagl_element_t *e);
