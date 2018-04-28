@@ -16,6 +16,9 @@
 /** text description font. */
 #define TX_DESC_FONT BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_CENTER
 
+/** the idle screen icon */
+bagl_icon_details_t C_icon_idle;
+
 /** the timer */
 int exit_timer;
 
@@ -27,6 +30,9 @@ enum UI_STATE uiState;
 
 /** UI state flag */
 ux_state_t ux;
+
+/** notification to refresh the view, if we are displaying the public key */
+unsigned char publicKeyNeedsRefresh;
 
 /** index of the current screen. */
 unsigned int curr_scr_ix;
@@ -52,6 +58,9 @@ char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 /** currently displayed text description. */
 char curr_tx_desc[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 
+/** currently displayed public key */
+bagl_icon_details_t current_public_key[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
+
 /** UI was touched indicating the user wants to exit the app */
 static const bagl_element_t * io_seproxyhal_touch_exit(const bagl_element_t *e);
 
@@ -67,6 +76,9 @@ static void ui_sign(void);
 /** display the UI for denying a transaction */
 static void ui_deny(void);
 
+/** show the public key screen */
+static void ui_public_key(void);
+
 /** move up in the transaction description list */
 static const bagl_element_t * tx_desc_up(const bagl_element_t *e);
 
@@ -80,11 +92,13 @@ static const bagl_element_t bagl_ui_idle_nanos[] = {
 // },
 		{	{	BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 		/* bananos icon */
-		{	{	BAGL_ICON, 0x00, 40, 14, 104, 32, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&C_icon_banana, 0, 0, 0, NULL, NULL, NULL, },
+		{	{	BAGL_ICON, 0x00, 40, 14, 104, 32, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&C_icon_idle, 0, 0, 0, NULL, NULL, NULL, },
 		/* center text */
 		{	{	BAGL_LABELINE, 0x00, 0, 12, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, WAITING_MESSAGE, 0, 0, 0, NULL, NULL, NULL, },
 		/* left icon is a X */
 		{	{	BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+		/* right icon is an eye. */
+		{	{	BAGL_ICON, 0x00, 117, 11, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_EYE_BADGE }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 /* */
 };
 
@@ -110,12 +124,44 @@ static const bagl_element_t bagl_ui_idle_blue[] = {
  */
 static unsigned int bagl_ui_idle_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
 	switch (button_mask) {
+	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
+		ui_public_key();
+		break;
 	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
-	case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT:
 		io_seproxyhal_touch_exit(NULL);
 		break;
 	}
 
+	return 0;
+}
+
+/** UI struct for the public key screen */
+static const bagl_element_t bagl_ui_public_key_nanos[] = {
+// { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
+// text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
+// },
+		{	{	BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+		/* first line of description of current public key */
+		{	{	BAGL_LABELINE, 0x02, 10, 10, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[0], 0, 0, 0, NULL, NULL, NULL, },
+		/* second line of description of current public key */
+		{	{	BAGL_LABELINE, 0x02, 10, 21, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[1], 0, 0, 0, NULL, NULL, NULL, },
+		/* third line of description of current public key  */
+		{	{	BAGL_LABELINE, 0x02, 10, 32, 108, 11, 0x80 | 10, 0, 0, 0xFFFFFF, 0x000000, TX_DESC_FONT, 0 }, current_public_key[2], 0, 0, 0, NULL, NULL, NULL, },
+		/* right icon is a X */
+		{	{	BAGL_ICON, 0x00, 113, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_CROSS }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+/* */
+};
+/**
+ * buttons for the idle screen
+ *
+ * exit on Left button, or on Both buttons. Do nothing on Right button only.
+ */
+static unsigned int bagl_ui_public_key_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	switch (button_mask) {
+	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
+		ui_idle();
+		break;
+	}
 	return 0;
 }
 
@@ -493,6 +539,17 @@ static unsigned int bagl_ui_top_sign_blue_button(unsigned int button_mask, unsig
 
 static unsigned int bagl_ui_deny_blue_button(unsigned int button_mask, unsigned int button_mask_counter) {
 	return 0;
+}
+
+/** show the public key screen */
+void ui_public_key(void) {
+	uiState = UI_PUBLIC_KEY;
+	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
+		// TODO: add screen for the blue.
+		UX_DISPLAY(bagl_ui_public_key_nanos, NULL);
+	} else {
+		UX_DISPLAY(bagl_ui_public_key_nanos, NULL);
+	}
 }
 
 /** show the idle screen. */

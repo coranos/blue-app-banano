@@ -83,10 +83,10 @@ include $(BOLOS_SDK)/Makefile.glyphs
 all: default
 
 load: all
-	python -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
+	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
 
 delete:
-	python -m ledgerblue.deleteApp $(APP_DELETE_PARAMS)
+	python3 -m ledgerblue.deleteApp $(APP_DELETE_PARAMS)
 
 # Import generic rules from the SDK
 
