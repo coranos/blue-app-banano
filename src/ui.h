@@ -11,6 +11,9 @@
 #include "bagl.h"
 #include "ed25519.h"
 
+/** the idle screen icon */
+extern bagl_icon_details_t C_icon_idle;
+
 /** the timer */
 extern int exit_timer;
 
@@ -69,7 +72,7 @@ extern char timer_desc[MAX_TIMER_TEXT_WIDTH];
 
 /** UI currently displayed */
 enum UI_STATE {
-	UI_INIT, UI_IDLE, UI_TOP_SIGN, UI_TX_DESC, UI_SIGN, UI_DENY
+	UI_INIT, UI_IDLE, UI_TOP_SIGN, UI_TX_DESC, UI_SIGN, UI_DENY, UI_PUBLIC_KEY
 };
 
 /** UI state enum */
@@ -77,6 +80,9 @@ extern enum UI_STATE uiState;
 
 /** UI state flag */
 extern ux_state_t ux;
+
+/** notification to refresh the view, if we are displaying the public key */
+extern unsigned char publicKeyNeedsRefresh;
 
 /** index of the current screen. */
 extern unsigned int curr_scr_ix;
@@ -101,6 +107,9 @@ extern char tx_desc[MAX_TX_TEXT_SCREENS][MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 
 /** currently displayed text description. */
 extern char curr_tx_desc[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
+
+/** currently displayed public key */
+extern char current_public_key[MAX_TX_TEXT_LINES][MAX_TX_TEXT_WIDTH];
 
 /** process a partial transaction */
 const bagl_element_t * io_seproxyhal_touch_approve(const bagl_element_t *e);
