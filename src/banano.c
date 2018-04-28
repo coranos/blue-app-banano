@@ -12,7 +12,7 @@ static const char TX_NM[] = "State Tx";
 /** Label when a public key has not been set yet */
 static const bagl_icon_details_t * NO_KEY_0[] = {
 	//	&C_base32_N,&C_base32_O,NULL
-	&C_base32_1,&C_base32_2
+	&C_base32_1,&C_base32_3
 };
 /*
 static const bagl_icon_details_t * NO_KEY_1[] = {
