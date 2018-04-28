@@ -12,7 +12,7 @@ static const char TX_NM[] = "State Tx";
 /** Label when a public key has not been set yet */
 static const bagl_icon_details_t * NO_KEY_0[] = {
 	//	&C_base32_N,&C_base32_O,NULL
-	&C_base32_1,&C_base32_1
+	&C_base32_1,&C_base32_2
 };
 /*
 static const bagl_icon_details_t * NO_KEY_1[] = {
@@ -26,7 +26,7 @@ static const bagl_icon_details_t * NO_KEY_2[] = {
 */
 
 /** array of the glyphs used in base32 conversion */
-/*
+
 static const bagl_icon_details_t * BASE_32_GLYPHS = {
 	&C_base32_1, &C_base32_3, &C_base32_4, &C_base32_5,
 	&C_base32_6, &C_base32_7, &C_base32_8, &C_base32_9,
@@ -37,7 +37,7 @@ static const bagl_icon_details_t * BASE_32_GLYPHS = {
 	&C_base32_R, &C_base32_S, &C_base32_T, &C_base32_U,
 	&C_base32_W, &C_base32_X, &C_base32_Y, &C_base32_Z
 };
-*/
+
 
 /** array of capital letter hex values */
 //static const char HEX_CAP[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };
