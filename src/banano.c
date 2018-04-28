@@ -12,18 +12,18 @@ static const char TX_NM[] = "State Tx";
 /** Label when a public key has not been set yet */
 static const bagl_icon_details_t * NO_KEY_0[] = {
 	//	&C_base32_N,&C_base32_O,NULL
-	&C_base32_1,&C_base32_2
+	&C_base32_1,&C_base32_3,NULL
 };
 /*
-static const bagl_icon_details_t * NO_KEY_1[] = {
-//	&C_base32_K,&C_base32_E,&C_base32_Y
-	&C_base32_1,&C_base32_1,&C_base32_1
-};
-static const bagl_icon_details_t * NO_KEY_2[] = {
-//	&C_base32_Y,&C_base32_E,&C_base32_T
-	&C_base32_1,&C_base32_1,&C_base32_1
-};
-*/
+   static const bagl_icon_details_t * NO_KEY_1[] = {
+   //	&C_base32_K,&C_base32_E,&C_base32_Y
+   &C_base32_1,&C_base32_1,&C_base32_1
+   };
+   static const bagl_icon_details_t * NO_KEY_2[] = {
+   //	&C_base32_Y,&C_base32_E,&C_base32_T
+   &C_base32_1,&C_base32_1,&C_base32_1
+   };
+ */
 
 /** array of the glyphs used in base32 conversion */
 
@@ -66,21 +66,30 @@ static const bagl_icon_details_t * BASE_32_GLYPHS = {
 //}
 
 void display_no_public_key() {
-	for(int x = 0; x < MAX_TX_ICON_WIDTH; x++) {
-		for(int y = 0; y < MAX_TX_ICON_LINES; y++) {
+	int x;
+	int y;
+	for(x = 0; x < MAX_TX_ICON_WIDTH; x++) {
+		for(y = 0; y < MAX_TX_ICON_LINES; y++) {
 			current_public_key[y][x] = C_base32__;
 		}
 	}
 
-	//	for(int x = 0; (x < MAX_TX_ICON_WIDTH) && (NO_KEY_0[x] != NULL); x++) {
-	if(NO_KEY_0[0] != NULL) {
-		current_public_key[0][0] = *NO_KEY_0[0];
+	x = 0;
+	if(NO_KEY_0[x] != NULL) {
+		current_public_key[0][x] = *NO_KEY_0[x];
 	}
-	if(NO_KEY_0[1] != NULL) {
-		current_public_key[0][1] = *NO_KEY_0[1];
+	x++;
+	if(NO_KEY_0[x] != NULL) {
+		current_public_key[0][x] = *NO_KEY_0[x];
 	}
-//	for(int x = 0; (x < 2) && (NO_KEY_0[x] != NULL); x++) {
-//		current_public_key[x][0] = *NO_KEY_0[x];
+	x++;
+	if(NO_KEY_0[x] != NULL) {
+		current_public_key[0][x] = *NO_KEY_0[x];
+	}
+//	for(x = 0; x < 2; x++) {
+//		if(NO_KEY_0[x] != NULL) {
+//			current_public_key[0][x] = *NO_KEY_0[x];
+//		}
 //	}
 
 	//os_memmove(current_public_key[0], NO_KEY_0, sizeof(NO_KEY_0));
