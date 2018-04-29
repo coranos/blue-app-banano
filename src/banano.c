@@ -9,37 +9,6 @@ static const char TXT_BLANK[] = "                 ";
 /** Label when displaying a State transaction */
 static const char TX_NM[] = "State Tx";
 
-/** Label when a public key has not been set yet */
-/*
-   static const bagl_icon_details_t * NO_KEY_0[] = {
-    //	&C_base32_N,&C_base32_O,NULL
-    &C_base32_1,&C_base32_3,NULL
-   };
-   static const bagl_icon_details_t * NO_KEY_1[] = {
-   //	&C_base32_K,&C_base32_E,&C_base32_Y
-   &C_base32_1,&C_base32_1,&C_base32_1
-   };
-   static const bagl_icon_details_t * NO_KEY_2[] = {
-   //	&C_base32_Y,&C_base32_E,&C_base32_T
-   &C_base32_1,&C_base32_1,&C_base32_1
-   };
- */
-
-/** array of the glyphs used in base32 conversion */
-/*
-   static const bagl_icon_details_t * BASE_32_GLYPHS = {
-   &C_base32_1, &C_base32_3, &C_base32_4, &C_base32_5,
-   &C_base32_6, &C_base32_7, &C_base32_8, &C_base32_9,
-   &C_base32_A, &C_base32_B, &C_base32_C, &C_base32_D,
-   &C_base32_E, &C_base32_F, &C_base32_G, &C_base32_H,
-   &C_base32_I, &C_base32_J, &C_base32_K, &C_base32_M,
-   &C_base32_N, &C_base32_O, &C_base32_P, &C_base32_Q,
-   &C_base32_R, &C_base32_S, &C_base32_T, &C_base32_U,
-   &C_base32_W, &C_base32_X, &C_base32_Y, &C_base32_Z
-   };
- */
-
-
 /** array of capital letter hex values */
 //static const char HEX_CAP[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };
 
@@ -75,8 +44,71 @@ void display_blank() {
 
 const bagl_icon_details_t * glyph(const char c) {
 	switch (c) {
+	case '1':
+		return &C_base32_1;
+	case '3':
+		return &C_base32_3;
+	case '4':
+		return &C_base32_4;
+	case '5':
+		return &C_base32_5;
+	case '6':
+		return &C_base32_6;
+	case '7':
+		return &C_base32_7;
+	case '8':
+		return &C_base32_8;
+	case '9':
+		return &C_base32_9;
 	case 'A':
 		return &C_base32_A;
+	case 'B':
+		return &C_base32_B;
+	case 'C':
+		return &C_base32_C;
+	case 'D':
+		return &C_base32_D;
+	case 'E':
+		return &C_base32_E;
+	case 'F':
+		return &C_base32_F;
+	case 'G':
+		return &C_base32_G;
+	case 'H':
+		return &C_base32_H;
+	case 'I':
+		return &C_base32_I;
+	case 'J':
+		return &C_base32_J;
+	case 'K':
+		return &C_base32_K;
+	case 'M':
+		return &C_base32_M;
+	case 'N':
+		return &C_base32_N;
+	case 'O':
+		return &C_base32_O;
+	case 'P':
+		return &C_base32_P;
+	case 'Q':
+		return &C_base32_Q;
+	case 'R':
+		return &C_base32_R;
+	case 'S':
+		return &C_base32_S;
+	case 'T':
+		return &C_base32_T;
+	case 'U':
+		return &C_base32_U;
+	case 'W':
+		return &C_base32_W;
+	case 'X':
+		return &C_base32_X;
+	case 'Y':
+		return &C_base32_Y;
+	case 'Z':
+		return &C_base32_Z;
+
 	default:
 		return &C_base32__;
 	}
@@ -94,7 +126,16 @@ void display_no_key() {
 	current_public_key[0][8] = C_base32_E;
 	current_public_key[0][9] = C_base32_T;
 
-	current_public_key[1][0] = *glyph('A');
+	current_public_key[0][17] = *glyph('A');
+	current_public_key[0][18] = *glyph('B');
+	current_public_key[0][19] = *glyph('C');
+	current_public_key[0][20] = *glyph('D');
+
+	current_public_key[1][0] = *glyph('1');
+	current_public_key[1][20] = *glyph('2');
+
+	current_public_key[2][0] = *glyph('3');
+	current_public_key[2][20] = *glyph('4');
 }
 
 void display_no_public_key() {
