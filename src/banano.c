@@ -9,22 +9,6 @@ static const char TXT_BLANK[] = "                 ";
 /** Label when displaying a State transaction */
 static const char TX_NM[] = "State Tx";
 
-/** Label when a public key has not been set yet */
-/*
-   static const bagl_icon_details_t * NO_KEY_0[] = {
-    //	&C_base32_N,&C_base32_O,NULL
-    &C_base32_1,&C_base32_3,NULL
-   };
-   static const bagl_icon_details_t * NO_KEY_1[] = {
-   //	&C_base32_K,&C_base32_E,&C_base32_Y
-   &C_base32_1,&C_base32_1,&C_base32_1
-   };
-   static const bagl_icon_details_t * NO_KEY_2[] = {
-   //	&C_base32_Y,&C_base32_E,&C_base32_T
-   &C_base32_1,&C_base32_1,&C_base32_1
-   };
- */
-
 /** array of the glyphs used in base32 conversion */
 /*
    static const bagl_icon_details_t * BASE_32_GLYPHS = {
