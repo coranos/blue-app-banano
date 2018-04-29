@@ -10,11 +10,11 @@ static const char TXT_BLANK[] = "                 ";
 static const char TX_NM[] = "State Tx";
 
 /** Label when a public key has not been set yet */
-static const bagl_icon_details_t * NO_KEY_0[] = {
-	//	&C_base32_N,&C_base32_O,NULL
-	&C_base32_1,&C_base32_3,NULL
-};
 /*
+   static const bagl_icon_details_t * NO_KEY_0[] = {
+    //	&C_base32_N,&C_base32_O,NULL
+    &C_base32_1,&C_base32_3,NULL
+   };
    static const bagl_icon_details_t * NO_KEY_1[] = {
    //	&C_base32_K,&C_base32_E,&C_base32_Y
    &C_base32_1,&C_base32_1,&C_base32_1
@@ -26,17 +26,18 @@ static const bagl_icon_details_t * NO_KEY_0[] = {
  */
 
 /** array of the glyphs used in base32 conversion */
-
-static const bagl_icon_details_t * BASE_32_GLYPHS = {
-	&C_base32_1, &C_base32_3, &C_base32_4, &C_base32_5,
-	&C_base32_6, &C_base32_7, &C_base32_8, &C_base32_9,
-	&C_base32_A, &C_base32_B, &C_base32_C, &C_base32_D,
-	&C_base32_E, &C_base32_F, &C_base32_G, &C_base32_H,
-	&C_base32_I, &C_base32_J, &C_base32_K, &C_base32_M,
-	&C_base32_N, &C_base32_O, &C_base32_P, &C_base32_Q,
-	&C_base32_R, &C_base32_S, &C_base32_T, &C_base32_U,
-	&C_base32_W, &C_base32_X, &C_base32_Y, &C_base32_Z
-};
+/*
+   static const bagl_icon_details_t * BASE_32_GLYPHS = {
+   &C_base32_1, &C_base32_3, &C_base32_4, &C_base32_5,
+   &C_base32_6, &C_base32_7, &C_base32_8, &C_base32_9,
+   &C_base32_A, &C_base32_B, &C_base32_C, &C_base32_D,
+   &C_base32_E, &C_base32_F, &C_base32_G, &C_base32_H,
+   &C_base32_I, &C_base32_J, &C_base32_K, &C_base32_M,
+   &C_base32_N, &C_base32_O, &C_base32_P, &C_base32_Q,
+   &C_base32_R, &C_base32_S, &C_base32_T, &C_base32_U,
+   &C_base32_W, &C_base32_X, &C_base32_Y, &C_base32_Z
+   };
+ */
 
 
 /** array of capital letter hex values */
@@ -64,37 +65,41 @@ static const bagl_icon_details_t * BASE_32_GLYPHS = {
 //		THROW(0x6D03);
 //	}
 //}
-
-void display_no_public_key() {
-	int x;
-	int y;
-	for(x = 0; x < MAX_TX_ICON_WIDTH; x++) {
-		for(y = 0; y < MAX_TX_ICON_LINES; y++) {
+void display_blank() {
+	for(int x = 0; x < MAX_TX_ICON_WIDTH; x++) {
+		for(int y = 0; y < MAX_TX_ICON_LINES; y++) {
 			current_public_key[y][x] = C_base32__;
 		}
 	}
+}
 
-	x = 0;
-	if(NO_KEY_0[x] != NULL) {
-		current_public_key[0][x] = *NO_KEY_0[x];
+const bagl_icon_details_t * glyph(const char c) {
+	switch (c) {
+	case 'A':
+		return &C_base32_A;
+	default:
+		return &C_base32__;
 	}
-	x++;
-	if(NO_KEY_0[x] != NULL) {
-		current_public_key[0][x] = *NO_KEY_0[x];
-	}
-	x++;
-	if(NO_KEY_0[x] != NULL) {
-		current_public_key[0][x] = *NO_KEY_0[x];
-	}
-//	for(x = 0; x < 2; x++) {
-//		if(NO_KEY_0[x] != NULL) {
-//			current_public_key[0][x] = *NO_KEY_0[x];
-//		}
-//	}
+}
 
-	//os_memmove(current_public_key[0], NO_KEY_0, sizeof(NO_KEY_0));
-	//os_memmove(current_public_key[1], NO_KEY_1, sizeof(NO_KEY_1));
-	//os_memmove(current_public_key[2], NO_KEY_2, sizeof(NO_KEY_2));
+void display_no_key() {
+	current_public_key[0][0] = C_base32_N;
+	current_public_key[0][1] = C_base32_O;
+
+	current_public_key[0][3] = C_base32_K;
+	current_public_key[0][4] = C_base32_E;
+	current_public_key[0][5] = C_base32_Y;
+
+	current_public_key[0][7] = C_base32_Y;
+	current_public_key[0][8] = C_base32_E;
+	current_public_key[0][9] = C_base32_T;
+
+	current_public_key[1][0] = *glyph('A');
+}
+
+void display_no_public_key() {
+	display_blank();
+	display_no_key();
 
 	C_icon_idle = C_icon_default;
 
