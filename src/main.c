@@ -29,26 +29,14 @@
 
 #define EXIT_TIMER_REFRESH_INTERVAL 512
 
-static void Timer_UpdateDescription() {
-	snprintf(timer_desc, MAX_TIMER_TEXT_WIDTH, "%d", exit_timer / EXIT_TIMER_REFRESH_INTERVAL);
-}
-
-static void Timer_UpdateDisplay() {
-	if ((exit_timer % EXIT_TIMER_REFRESH_INTERVAL) == (EXIT_TIMER_REFRESH_INTERVAL / 2)) {
-		UX_REDISPLAY();
-	}
-}
-
 static void Timer_Tick() {
 	if (exit_timer > 0) {
 		exit_timer--;
-		Timer_UpdateDescription();
 	}
 }
 
 static void Timer_Set() {
 	exit_timer = MAX_EXIT_TIMER;
-	Timer_UpdateDescription();
 }
 
 static void Timer_Restart() {
@@ -68,17 +56,11 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 #define CLA 0x80
 
 /** #### instructions start #### **/
-/** instruction to reset the transaction. */
-#define INS_RESET 0x03
-
 /** instruction to sign transaction and send back the signature. */
 #define INS_SIGN 0x02
 
 /** instruction to send back the public key. */
 #define INS_GET_PUBLIC_KEY 0x04
-
-/** instruction to send back the private key. */
-#define INS_GET_PRIVATE_KEY 0x05
 
 /** instruction to send back the public key, and a signature of the private key signing the public key. */
 #define INS_GET_SIGNED_PUBLIC_KEY 0x08
@@ -164,19 +146,6 @@ static void banano_main(void) {
 				// check the second byte (0x01) for the instruction.
 				switch (G_io_apdu_buffer[1]) {
 
-				// we're resetting the transaction.
-				case INS_RESET: {
-					Timer_Restart();
-
-					// reset the temporary variables.
-					raw_tx_ix = 0;
-					raw_tx_len = 0;
-
-					// return 0x9000 OK.
-					THROW(0x9000);
-				}
-				break;
-
 				// we're getting a transaction to sign, in parts.
 				case INS_SIGN: {
 					Timer_Restart();
@@ -195,9 +164,6 @@ static void banano_main(void) {
 					os_memmove(out, in, len);
 					raw_tx_ix += len;
 
-					// set the screen to be the first screen.
-					curr_scr_ix = 0;
-
 					// set the buffer to end with a zero.
 					G_io_apdu_buffer[APDU_HEADER_LENGTH + len] = '\0';
 
@@ -205,9 +171,6 @@ static void banano_main(void) {
 					if (G_io_apdu_buffer[2] == P1_LAST) {
 						raw_tx_len = raw_tx_ix;
 						raw_tx_ix = 0;
-
-//								 parse the transaction into human readable text.
-//								display_tx_desc();
 
 //								// sign the transaction
 						size_t raw_tx_len_except_bip44 = raw_tx_len - BIP44_BYTE_LENGTH;
@@ -226,59 +189,25 @@ static void banano_main(void) {
 						ed25519_publickey(sk, pk);
 						ed25519_sign(raw_tx, raw_tx_len_except_bip44, sk, pk, sig);
 
-						os_memmove(G_io_apdu_buffer, sig, sizeof(sig));
-						tx = sizeof(sig);
+						//os_memmove(G_io_apdu_buffer, sig, sizeof(sig));
+						//tx = sizeof(sig);
 
-						// display the UI, starting at the top screen which is "Sign Tx Now".
-//								ui_top_sign();
+						// populate teh uis for account and amount.
+						update_tx_address_data();
+						update_tx_amount_data();
+
+						// display the UI, starting at the top screen which is "Sign Tx".
+						ui_sign();
 					}
 
-//							flags |= IO_ASYNCH_REPLY;
-//
-//							// if this is not the last part of the transaction, do not display the UI, and approve the partial transaction.
-//							// this adds the TX to the hash.
-//							if (G_io_apdu_buffer[2] == P1_MORE) {
-//								io_seproxyhal_touch_approve(NULL);
-//							}
-
-					// return 0x9000 OK.
-					THROW(0x9000);
+					if (G_io_apdu_buffer[2] == P1_MORE) {
+						// return 0x9000 OK.
+						THROW(0x9000);
+					} else {
+						flags |= IO_ASYNCH_REPLY;
+					}
 				}
 				break;
-
-				// we're asked for the private key.
-				case INS_GET_PRIVATE_KEY: {
-					Timer_Restart();
-
-//							cx_ecfp_private_key_t privateKey;
-
-					if (rx < APDU_HEADER_LENGTH + BIP44_BYTE_LENGTH) {
-						THROW(0x6D09);
-					}
-
-					/** BIP44 path, used to derive the private key from the mnemonic by calling os_perso_derive_node_bip32. */
-					unsigned char * bip44_in = G_io_apdu_buffer + APDU_HEADER_LENGTH;
-
-					unsigned int bip44_path[BIP44_PATH_LEN];
-					uint32_t i;
-					for (i = 0; i < BIP44_PATH_LEN; i++) {
-						bip44_path[i] = (bip44_in[0] << 24) | (bip44_in[1] << 16) | (bip44_in[2] << 8) | (bip44_in[3]);
-						bip44_in += 4;
-					}
-
-					unsigned char privateKeyData[32];
-					//os_memset(privateKeyData, 0, sizeof(privateKeyData));
-					os_perso_derive_node_bip32(CX_CURVE_Ed25519, bip44_path, BIP44_PATH_LEN, privateKeyData, NULL);
-
-					// push the private key onto the response buffer.
-					os_memmove(G_io_apdu_buffer, privateKeyData, 32);
-					tx = 32;
-
-					// return 0x9000 OK.
-					THROW(0x9000);
-				}
-				break;
-
 
 				// we're asked for the public key.
 				case INS_GET_SIGNED_PUBLIC_KEY:
@@ -305,7 +234,7 @@ static void banano_main(void) {
 					ed25519_public_key pk;
 					ed25519_publickey(sk, pk);
 
-					display_public_key(&pk, C_icon_banano);
+					update_public_key_data(&pk, C_icon_banano);
 
 					refresh_public_key_display();
 					refresh_idle_display();
@@ -399,8 +328,6 @@ unsigned char io_event(unsigned char channel) {
 		} else {
 			if (Timer_Expired()) {
 				os_sched_exit(0);
-			} else {
-				Timer_UpdateDisplay();
 			}
 		}
 
@@ -426,8 +353,6 @@ __attribute__((section(".boot"))) int main(void) {
 	// exit critical section
 	__asm volatile ("cpsie i");
 
-	curr_scr_ix = 0;
-	max_scr_ix = 0;
 	raw_tx_ix = 0;
 	uiState = UI_IDLE;
 
@@ -455,7 +380,7 @@ __attribute__((section(".boot"))) int main(void) {
 			USB_power(1);
 
 			// init the public key display to "no public key".
-			display_no_public_key();
+			update_no_public_key_data();
 
 			// show idle screen.
 			ui_idle();

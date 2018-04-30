@@ -12,13 +12,16 @@
 #include "ui.h"
 #include "glyphs.h"
 
-/** parse the raw transaction in raw_tx and fill up the screens in tx_desc. */
-unsigned char display_tx_desc(void);
+/** update the data on the screen with the tx address */
+void update_tx_address_data(void);
+
+/** update the data on the screen with the tx amount */
+void update_tx_amount_data(void);
 
 /** displays the "no public key" message, prior to a public key being requested. */
-void display_no_public_key(void);
+void update_no_public_key_data(void);
 
 /** displays the public key, assumes length is 64. */
-void display_public_key(const ed25519_public_key * public_key, bagl_icon_details_t const C_icon);
+void update_public_key_data(const ed25519_public_key * public_key, bagl_icon_details_t const C_icon);
 
 #endif // BANANO_H
