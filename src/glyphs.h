@@ -5,7 +5,7 @@
 extern
 unsigned int const C_base32_1_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_1_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -20,7 +20,7 @@ const bagl_icon_details_t C_base32_1;
 extern
 unsigned int const C_base32_3_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_3_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -35,7 +35,7 @@ const bagl_icon_details_t C_base32_3;
 extern
 unsigned int const C_base32_4_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_4_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -50,7 +50,7 @@ const bagl_icon_details_t C_base32_4;
 extern
 unsigned int const C_base32_5_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_5_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -65,7 +65,7 @@ const bagl_icon_details_t C_base32_5;
 extern
 unsigned int const C_base32_6_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_6_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -80,7 +80,7 @@ const bagl_icon_details_t C_base32_6;
 extern
 unsigned int const C_base32_7_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_7_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -95,7 +95,7 @@ const bagl_icon_details_t C_base32_7;
 extern
 unsigned int const C_base32_8_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_8_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -110,7 +110,7 @@ const bagl_icon_details_t C_base32_8;
 extern
 unsigned int const C_base32_9_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_9_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -125,7 +125,7 @@ const bagl_icon_details_t C_base32_9;
 extern
 unsigned int const C_base32_A_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_A_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -140,7 +140,7 @@ const bagl_icon_details_t C_base32_A;
 extern
 unsigned int const C_base32_B_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_B_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -155,7 +155,7 @@ const bagl_icon_details_t C_base32_B;
 extern
 unsigned int const C_base32_C_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_C_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -170,7 +170,7 @@ const bagl_icon_details_t C_base32_C;
 extern
 unsigned int const C_base32_D_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_D_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -185,7 +185,7 @@ const bagl_icon_details_t C_base32_D;
 extern
 unsigned int const C_base32_E_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_E_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -200,7 +200,7 @@ const bagl_icon_details_t C_base32_E;
 extern
 unsigned int const C_base32_F_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_F_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -215,7 +215,7 @@ const bagl_icon_details_t C_base32_F;
 extern
 unsigned int const C_base32_G_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_G_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -230,7 +230,7 @@ const bagl_icon_details_t C_base32_G;
 extern
 unsigned int const C_base32_H_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_H_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -245,7 +245,7 @@ const bagl_icon_details_t C_base32_H;
 extern
 unsigned int const C_base32_I_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_I_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -260,7 +260,7 @@ const bagl_icon_details_t C_base32_I;
 extern
 unsigned int const C_base32_J_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_J_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -275,7 +275,7 @@ const bagl_icon_details_t C_base32_J;
 extern
 unsigned int const C_base32_K_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_K_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -290,7 +290,7 @@ const bagl_icon_details_t C_base32_K;
 extern
 unsigned int const C_base32_M_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_M_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -305,7 +305,7 @@ const bagl_icon_details_t C_base32_M;
 extern
 unsigned int const C_base32_N_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_N_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -320,7 +320,7 @@ const bagl_icon_details_t C_base32_N;
 extern
 unsigned int const C_base32_O_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_O_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -335,7 +335,7 @@ const bagl_icon_details_t C_base32_O;
 extern
 unsigned int const C_base32_P_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_P_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -350,7 +350,7 @@ const bagl_icon_details_t C_base32_P;
 extern
 unsigned int const C_base32_Q_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_Q_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -365,7 +365,7 @@ const bagl_icon_details_t C_base32_Q;
 extern
 unsigned int const C_base32_R_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_R_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -380,7 +380,7 @@ const bagl_icon_details_t C_base32_R;
 extern
 unsigned int const C_base32_S_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_S_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -395,7 +395,7 @@ const bagl_icon_details_t C_base32_S;
 extern
 unsigned int const C_base32_T_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_T_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -410,7 +410,7 @@ const bagl_icon_details_t C_base32_T;
 extern
 unsigned int const C_base32_U_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_U_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -425,7 +425,7 @@ const bagl_icon_details_t C_base32_U;
 extern
 unsigned int const C_base32_W_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_W_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -440,7 +440,7 @@ const bagl_icon_details_t C_base32_W;
 extern
 unsigned int const C_base32_X_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_X_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -455,7 +455,7 @@ const bagl_icon_details_t C_base32_X;
 extern
 unsigned int const C_base32_Y_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_Y_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -470,7 +470,7 @@ const bagl_icon_details_t C_base32_Y;
 extern
 unsigned int const C_base32_Z_colors[]
 ;
-extern
+extern	
 unsigned char const C_base32_Z_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -485,7 +485,7 @@ const bagl_icon_details_t C_base32_Z;
 extern
 unsigned int const C_base32___colors[]
 ;
-extern
+extern	
 unsigned char const C_base32___bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -500,7 +500,7 @@ const bagl_icon_details_t C_base32__;
 extern
 unsigned int const C_icon_banano_colors[]
 ;
-extern
+extern	
 unsigned char const C_icon_banano_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -515,7 +515,7 @@ const bagl_icon_details_t C_icon_banano;
 extern
 unsigned int const C_icon_default_colors[]
 ;
-extern
+extern	
 unsigned char const C_icon_default_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"
@@ -530,7 +530,7 @@ const bagl_icon_details_t C_icon_default;
 extern
 unsigned int const C_icon_nano_colors[]
 ;
-extern
+extern	
 unsigned char const C_icon_nano_bitmap[];
 #ifdef OS_IO_SEPROXYHAL
 #include "os_io_seproxyhal.h"

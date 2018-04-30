@@ -2,8 +2,8 @@
  * MIT License, see root folder for full license.
  */
 
-#ifndef RAIBLOCKS_H
-#define RAIBLOCKS_H
+#ifndef BANANO_H
+#define BANANO_H
 
 #include "os.h"
 #include "cx.h"
@@ -21,4 +21,4 @@ void display_no_public_key(void);
 /** displays the public key, assumes length is 64. */
 void display_public_key(const ed25519_public_key * public_key, bagl_icon_details_t const C_icon);
 
-#endif // RAIBLOCKS_H
+#endif // BANANO_H

@@ -3,17 +3,20 @@
  */
 #include "banano.h"
 
+#include "base-encoding.h"
+
+/** */
+static const char NO_KEY0[] = "NO KEY REQUESTED";
+
 /** MAX_TX_TEXT_WIDTH in blanks, used for clearing a line of text */
 static const char TXT_BLANK[] = "                 ";
 
 /** Label when displaying a State transaction */
 static const char TX_NM[] = "State Tx";
 
-/** array of capital letter hex values */
-//static const char HEX_CAP[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };
 
-/** array of base10 aplhabet letters */
-//static const char BASE_10_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+/** last requested public key. */
+static char last_public_key[MAX_TX_ICON_WIDTH][MAX_TX_ICON_LINES];
 
 /** returns the next byte in raw_tx and increments raw_tx_ix. If this would increment raw_tx_ix over the end of the buffer, throw an error. */
 //static unsigned char next_raw_tx() {
@@ -115,27 +118,9 @@ const bagl_icon_details_t * glyph(const char c) {
 }
 
 void display_no_key() {
-	current_public_key[0][0] = C_base32_N;
-	current_public_key[0][1] = C_base32_O;
-
-	current_public_key[0][3] = C_base32_K;
-	current_public_key[0][4] = C_base32_E;
-	current_public_key[0][5] = C_base32_Y;
-
-	current_public_key[0][7] = C_base32_Y;
-	current_public_key[0][8] = C_base32_E;
-	current_public_key[0][9] = C_base32_T;
-
-	current_public_key[0][17] = *glyph('A');
-	current_public_key[0][18] = *glyph('B');
-	current_public_key[0][19] = *glyph('C');
-	current_public_key[0][20] = *glyph('D');
-
-	current_public_key[1][0] = *glyph('1');
-	current_public_key[1][20] = *glyph('2');
-
-	current_public_key[2][0] = *glyph('3');
-	current_public_key[2][20] = *glyph('4');
+	for(unsigned int x = 0; x < sizeof(NO_KEY0); x++) {
+		current_public_key[0][x] = *glyph(NO_KEY0[x]);
+	}
 }
 
 void display_no_public_key() {
@@ -148,9 +133,16 @@ void display_no_public_key() {
 }
 
 void display_public_key(const ed25519_public_key * public_key, bagl_icon_details_t const C_icon) {
-	//os_memmove(current_public_key[0], TXT_BLANK, sizeof(TXT_BLANK));
-	//os_memmove(current_public_key[1], TXT_BLANK, sizeof(TXT_BLANK));
-	//os_memmove(current_public_key[2], TXT_BLANK, sizeof(TXT_BLANK));
+	encode_base_32((void *)public_key,sizeof(ed25519_public_key),(char *)last_public_key,sizeof(last_public_key));
+
+	display_blank();
+
+
+	for(int x = 0; x < MAX_TX_ICON_WIDTH; x++) {
+		for(int y = 0; y < MAX_TX_ICON_LINES; y++) {
+			current_public_key[y][x] = *glyph(last_public_key[y][x]);
+		}
+	}
 
 	C_icon_idle = C_icon;
 }
