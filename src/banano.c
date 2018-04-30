@@ -2,7 +2,6 @@
  * MIT License, see root folder for full license.
  */
 #include "banano.h"
-
 #include "base-encoding.h"
 
 /** */
@@ -14,9 +13,21 @@ static const char TXT_BLANK[] = "                 ";
 /** Label when displaying a State transaction */
 static const char TX_NM[] = "State Tx";
 
+/** last requested public key. */
+extern char last_public_key[MAX_TX_ICON_WIDTH][MAX_TX_ICON_LINES];
+
+/** array of capital letter hex values */
+//static const char HEX_CAP[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };
+>>>>>>> 9b9e7e9c783265e1aba2e91015effbd28bc3efc7
 
 /** last requested public key. */
 static char last_public_key[MAX_TX_ICON_WIDTH][MAX_TX_ICON_LINES];
+
+/** array of base10 alphabet letters */
+static const char BASE_32_ALPHABET[] = {
+	'1', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
+	'I', 'J', 'K', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z'
+};
 
 /** returns the next byte in raw_tx and increments raw_tx_ix. If this would increment raw_tx_ix over the end of the buffer, throw an error. */
 //static unsigned char next_raw_tx() {
