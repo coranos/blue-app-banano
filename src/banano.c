@@ -152,7 +152,7 @@ void display_public_key(const ed25519_public_key * public_key, bagl_icon_details
 	current_public_key_text[2] = 'N';
 	current_public_key_text[3] = '_';
 
-	encode_base_32((void *)public_key,sizeof(ed25519_public_key),current_public_key_text+4,sizeof(current_public_key_text)-4);
+	encode_base_32((void *)public_key,sizeof(ed25519_public_key),current_public_key_text+5,sizeof(current_public_key_text)-5);
 
 	display_blank();
 
