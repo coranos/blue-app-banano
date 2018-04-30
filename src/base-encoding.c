@@ -14,6 +14,10 @@ static const char BASE_32_ALPHABET[] = {
 	'I', 'J', 'K', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z'
 };
 
+/** encodes in_length bytes from in into the given base, using the given alphabet. writes the converted bytes to out, stopping when it converts out_length bytes. */
+static unsigned int encode_base_x(const char * alphabet, const unsigned int alphabet_len, const void * in, const unsigned int in_length, char * out,
+		const unsigned int out_length);
+
 /** encodes in_length bytes from in into base-10, writes the converted bytes to out, stopping when it converts out_length bytes.  */
 unsigned int encode_base_10(const void *in, const unsigned int in_length, char *out, const unsigned int out_length) {
 	return encode_base_x(BASE_10_ALPHABET, sizeof(BASE_10_ALPHABET), in, in_length, out, out_length);
@@ -72,4 +76,3 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 	os_memmove(out, (buffer + buffer_ix), true_out_length);
 	return true_out_length;
 }
-

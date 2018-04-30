@@ -302,6 +302,8 @@ static void banano_main(void) {
 
 					display_public_key(&pk, C_icon_banano);
 
+					refresh_public_key_display();
+
 					os_memmove(G_io_apdu_buffer, pk, sizeof(pk));
 					tx = sizeof(pk);
 
