@@ -13,21 +13,11 @@ static const char TXT_BLANK[] = "                 ";
 /** Label when displaying a State transaction */
 static const char TX_NM[] = "State Tx";
 
-/** last requested public key. */
-extern char last_public_key[MAX_TX_ICON_WIDTH][MAX_TX_ICON_LINES];
-
 /** array of capital letter hex values */
 //static const char HEX_CAP[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };
->>>>>>> 9b9e7e9c783265e1aba2e91015effbd28bc3efc7
 
-/** last requested public key. */
-static char last_public_key[MAX_TX_ICON_WIDTH][MAX_TX_ICON_LINES];
-
-/** array of base10 alphabet letters */
-static const char BASE_32_ALPHABET[] = {
-	'1', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-	'I', 'J', 'K', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'W', 'X', 'Y', 'Z'
-};
+/** current public key text. */
+static char current_public_key_text[MAX_TX_ICON_WIDTH*MAX_TX_ICON_LINES];
 
 /** returns the next byte in raw_tx and increments raw_tx_ix. If this would increment raw_tx_ix over the end of the buffer, throw an error. */
 //static unsigned char next_raw_tx() {
@@ -51,7 +41,7 @@ static const char BASE_32_ALPHABET[] = {
 void display_blank() {
 	for(int x = 0; x < MAX_TX_ICON_WIDTH; x++) {
 		for(int y = 0; y < MAX_TX_ICON_LINES; y++) {
-			current_public_key[y][x] = C_base32__;
+			current_public_key[y][x] = C_base32__blank;
 		}
 	}
 }
@@ -122,9 +112,13 @@ const bagl_icon_details_t * glyph(const char c) {
 		return &C_base32_Y;
 	case 'Z':
 		return &C_base32_Z;
+	case ' ':
+		return &C_base32__blank;
+	case '_':
+		return &C_base32__underscore;
 
 	default:
-		return &C_base32__;
+		return &C_base32__error;
 	}
 }
 
@@ -140,18 +134,33 @@ void display_no_public_key() {
 
 	C_icon_idle = C_icon_default;
 
-	publicKeyNeedsRefresh = 0;
+	viewNeedsRefresh = 0;
 }
 
 void display_public_key(const ed25519_public_key * public_key, bagl_icon_details_t const C_icon) {
-	encode_base_32((void *)public_key,sizeof(ed25519_public_key),(char *)last_public_key,sizeof(last_public_key));
+	for(unsigned int x = 0; x < MAX_TX_ICON_WIDTH; x++) {
+		for(unsigned int y = 0; y < MAX_TX_ICON_LINES; y++) {
+			current_public_key[y][x] = C_base32__blank;
+		}
+	}
+
+	for(unsigned int c = 0; c < sizeof(current_public_key_text); c++) {
+		current_public_key_text[c] = ' ';
+	}
+	current_public_key_text[0] = 'B';
+	current_public_key_text[1] = 'A';
+	current_public_key_text[2] = 'N';
+	current_public_key_text[3] = '_';
+
+	encode_base_32((void *)public_key,sizeof(ed25519_public_key),current_public_key_text+4,sizeof(current_public_key_text)-4);
 
 	display_blank();
 
-
-	for(int x = 0; x < MAX_TX_ICON_WIDTH; x++) {
-		for(int y = 0; y < MAX_TX_ICON_LINES; y++) {
-			current_public_key[y][x] = *glyph(last_public_key[y][x]);
+	unsigned int c = 0;
+	for(unsigned int y = 0; y < MAX_TX_ICON_LINES; y++) {
+		for(unsigned int x = 0; x < MAX_TX_ICON_WIDTH; x++) {
+			current_public_key[y][x] = *glyph(current_public_key_text[c]);
+			c++;
 		}
 	}
 

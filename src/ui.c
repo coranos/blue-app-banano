@@ -32,7 +32,7 @@ enum UI_STATE uiState;
 ux_state_t ux;
 
 /** notification to refresh the view, if we are displaying the public key */
-unsigned char publicKeyNeedsRefresh;
+unsigned char viewNeedsRefresh;
 
 /** index of the current screen. */
 unsigned int curr_scr_ix;

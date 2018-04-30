@@ -87,8 +87,8 @@ extern enum UI_STATE uiState;
 /** UI state flag */
 extern ux_state_t ux;
 
-/** notification to refresh the view, if we are displaying the public key */
-extern unsigned char publicKeyNeedsRefresh;
+/** notification to refresh the view, if we are displaying data on the current view */
+extern unsigned char viewNeedsRefresh;
 
 /** index of the current screen. */
 extern unsigned int curr_scr_ix;

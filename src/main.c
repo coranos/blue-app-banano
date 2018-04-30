@@ -116,7 +116,12 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
 /** refreshes the display if the public key was changed ans we are on the page displaying the public key */
 static void refresh_public_key_display(void) {
 	if (uiState == UI_PUBLIC_KEY) {
-		publicKeyNeedsRefresh = 1;
+		viewNeedsRefresh = 1;
+	}
+}
+static void refresh_idle_display(void) {
+	if (uiState == UI_IDLE) {
+		viewNeedsRefresh = 1;
 	}
 }
 
@@ -302,6 +307,9 @@ static void banano_main(void) {
 
 					display_public_key(&pk, C_icon_banano);
 
+					refresh_public_key_display();
+					refresh_idle_display();
+
 					os_memmove(G_io_apdu_buffer, pk, sizeof(pk));
 					tx = sizeof(pk);
 
@@ -385,9 +393,9 @@ unsigned char io_event(unsigned char channel) {
 	case SEPROXYHAL_TAG_TICKER_EVENT:
 //		UX_REDISPLAY();
 		Timer_Tick();
-		if (publicKeyNeedsRefresh == 1) {
+		if (viewNeedsRefresh == 1) {
 			UX_REDISPLAY();
-			publicKeyNeedsRefresh = 0;
+			viewNeedsRefresh = 0;
 		} else {
 			if (Timer_Expired()) {
 				os_sched_exit(0);
