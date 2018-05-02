@@ -539,7 +539,11 @@ const bagl_icon_details_t C_icon_banano;
 #endif // GLYPH_icon_banano_BPP
 #endif // OS_IO_SEPROXYHAL
 #ifndef GLYPH_icon_default_BPP
+<<<<<<< HEAD
 #define GLYPH_icon_default_WIDTH 49
+=======
+#define GLYPH_icon_default_WIDTH 52
+>>>>>>> fc5a5eb72da6793529ae92fc538a4cc0520896a2
 #define GLYPH_icon_default_HEIGHT 16
 #define GLYPH_icon_default_BPP 1
 extern
