@@ -7,11 +7,8 @@
 /** */
 static const char NO_KEY0[] = "NO KEY REQUESTED";
 
-/** MAX_TX_TEXT_WIDTH in blanks, used for clearing a line of text */
-static const char TXT_BLANK[] = "                 ";
-
-/** Label when displaying a State transaction */
-static const char TX_NM[] = "State Tx";
+/** */
+static const char KEY_PREFIX_BAN[] = "BAN_";
 
 /** array of capital letter hex values */
 //static const char HEX_CAP[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', };

@@ -539,9 +539,9 @@ const bagl_icon_details_t C_icon_banano;
 #endif // GLYPH_icon_banano_BPP
 #endif // OS_IO_SEPROXYHAL
 #ifndef GLYPH_icon_default_BPP
-#define GLYPH_icon_default_WIDTH 6
-#define GLYPH_icon_default_HEIGHT 11
-#define GLYPH_icon_default_BPP 0
+#define GLYPH_icon_default_WIDTH 52
+#define GLYPH_icon_default_HEIGHT 16
+#define GLYPH_icon_default_BPP 1
 extern
 unsigned int const C_icon_default_colors[]
 ;
