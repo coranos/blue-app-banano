@@ -18,7 +18,8 @@ char current_public_key_text[MAX_PUBLIC_KEY_DIGITS];
 char current_tx_address_text[MAX_TX_ADDRESS_DIGITS];
 
 /** */
-static const char NO_KEY[] = "NO  PUBLIC  KEY  REQUESTED";
+static const char NO_KEY[] = "the ledger hasn'tseen a public keyrequest yet from a desktop app";
+                            //ban_100000000000|0000000000000000|0000000000000000|0000000000000
 
 /** */
 static const char KEY_PREFIX_BAN[] = "BAN_";

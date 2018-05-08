@@ -11,6 +11,12 @@ ban_14pjtq7kufnuzrroe5
 pjk4amdopozbo6g9bozpf
 jab8abkmaq941 hkourxtg
 
+ban_16baq9neqmychbd6oj1efk1wbm8oiz78u5gup9na1f7c1qbfdg35zpx31xk3
+ban_100000000000000000000000000000000000000000000000000000000000
+the ledger has not received a public key request from an app yet
+12345678901234567
+the ledger hasn't received a public key request from an app yet
+
 ui is 128x32.
 at 10 pixels high we can display 3 lines, 21 characters.
 that gives us 6 pixels width per character, for a total width of 126.
