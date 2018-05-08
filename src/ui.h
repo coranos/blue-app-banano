@@ -37,10 +37,10 @@ extern int exit_timer;
 #define  BIP44_BYTE_LENGTH (BIP44_PATH_LEN * sizeof(unsigned int))
 
 /** max number of lines of text to display */
-#define NUM_TEXT_DISPLAY_LINES 4
+#define NUM_TEXT_DISPLAY_LINES 5
 
 /** max width of lines of text to display */
-#define NUM_TEXT_DISPLAY_WIDTH 18
+#define NUM_TEXT_DISPLAY_WIDTH 14
 
 /**
  * Nano S has 320 KB flash, 10 KB RAM, uses a ST31H320 chip.
@@ -53,7 +53,8 @@ extern int exit_timer;
 
 /** UI currently displayed */
 enum UI_STATE {
-	UI_INIT, UI_IDLE, UI_SIGN, UI_TX_ADDR, UX_TX_AMT, UI_DENY, UI_PUBLIC_KEY_1, UI_PUBLIC_KEY_2, UI_PUBLIC_KEY_3
+	UI_INIT, UI_IDLE, UI_SIGN, UI_TX_ADDR, UX_TX_AMT, UI_DENY,
+	UI_PUBLIC_KEY_1, UI_PUBLIC_KEY_2, UI_PUBLIC_KEY_3, UI_PUBLIC_KEY_4
 };
 
 /** UI state enum */

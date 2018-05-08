@@ -9,7 +9,7 @@
 #define DEFAULT_FONT BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER
 
 /** description font */
-#define DESCRIPTION_FONT BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_LEFT
+#define DESCRIPTION_FONT BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_CENTER
 
 /** the idle screen icon */
 bagl_icon_details_t C_icon_idle;
@@ -74,6 +74,9 @@ static void ui_public_key_2(void);
 /** show the public key screen */
 static void ui_public_key_3(void);
 
+/** show the public key screen */
+static void ui_public_key_4(void);
+
 /** move up in the transaction description list */
 static const bagl_element_t * tx_desc_up(const bagl_element_t *e);
 
@@ -115,7 +118,7 @@ static unsigned int bagl_ui_idle_nanos_button(unsigned int button_mask, unsigned
 
 #define LINE_1_OFFSET 19
 #define LINE_2_OFFSET 30
-#define LINE_X_INDENT 20
+#define LINE_X_INDENT 10
 
 /** UI struct for the public key screen */
 static const bagl_element_t bagl_ui_public_key_nanos_1[] = {
@@ -232,10 +235,52 @@ static unsigned int bagl_ui_public_key_nanos_3_button(unsigned int button_mask, 
 		ui_idle();
 		break;
 	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
-		ui_public_key_1();
+		ui_public_key_4();
 		break;
 	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
 		ui_public_key_2();
+		break;
+	}
+	return 0;
+}
+
+
+/** UI struct for the public key screen */
+static const bagl_element_t bagl_ui_public_key_nanos_4[] = {
+// { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
+// text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
+// },
+	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* top left bar */
+	{ { BAGL_RECTANGLE, 0x00, 3, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* top right bar */
+	{ { BAGL_RECTANGLE, 0x00, 113, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* first line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_public_key_display[3], 0, 0, 0, NULL, NULL, NULL, },
+	/* second line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_public_key_display[4], 0, 0, 0, NULL, NULL, NULL, },
+	/* left icon is up arrow  */
+	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* right icon is down arrow */
+	{ { BAGL_ICON, 0x00, 117, 13, 8, 6, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+/* */
+};
+
+/**
+ * buttons for the idle screen
+ *
+ * exit on Left button, or on Both buttons. Do nothing on Right button only.
+ */
+static unsigned int bagl_ui_public_key_nanos_4_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	switch (button_mask) {
+	case BUTTON_EVT_RELEASED | BUTTON_LEFT | BUTTON_RIGHT:
+		ui_idle();
+		break;
+	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
+		ui_public_key_1();
+		break;
+	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
+		ui_public_key_3();
 		break;
 	}
 	return 0;
@@ -498,7 +543,7 @@ void ui_public_key_1(void) {
 	}
 }
 
-/** show the public key screen 1 */
+/** show the public key screen 2 */
 void ui_public_key_2(void) {
 	uiState = UI_PUBLIC_KEY_2;
 	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
@@ -509,7 +554,7 @@ void ui_public_key_2(void) {
 	}
 }
 
-/** show the public key screen 1 */
+/** show the public key screen 3 */
 void ui_public_key_3(void) {
 	uiState = UI_PUBLIC_KEY_3;
 	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
@@ -517,6 +562,17 @@ void ui_public_key_3(void) {
 		THROW(0x6DBL);
 	} else {
 		UX_DISPLAY(bagl_ui_public_key_nanos_3, NULL);
+	}
+}
+
+/** show the public key screen 4 */
+void ui_public_key_4(void) {
+	uiState = UI_PUBLIC_KEY_4;
+	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
+		// TODO: add screen for the blue.
+		THROW(0x6DBL);
+	} else {
+		UX_DISPLAY(bagl_ui_public_key_nanos_4, NULL);
 	}
 }
 

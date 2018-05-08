@@ -97,13 +97,18 @@ unsigned short io_exchange_al(unsigned char channel, unsigned short tx_len) {
 
 /** refreshes the display if the public key was changed ans we are on the page displaying the public key */
 static void refresh_public_key_display(void) {
-	if (uiState == UI_PUBLIC_KEY_1) {
+	switch(uiState) {
+	case UI_PUBLIC_KEY_1:
+	case UI_PUBLIC_KEY_2:
+	case UI_PUBLIC_KEY_3:
+	case UI_PUBLIC_KEY_4:
 		viewNeedsRefresh = 1;
-	}
-	if (uiState == UI_PUBLIC_KEY_2) {
-		viewNeedsRefresh = 1;
+		break;
+	default:
+		break;
 	}
 }
+
 static void refresh_idle_display(void) {
 	if (uiState == UI_IDLE) {
 		viewNeedsRefresh = 1;
