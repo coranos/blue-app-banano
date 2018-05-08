@@ -10,6 +10,7 @@
 #include "os_io_seproxyhal.h"
 #include "bagl.h"
 #include "ed25519.h"
+#include "banano.h"
 
 /** the idle screen icon */
 extern bagl_icon_details_t C_icon_idle;
@@ -35,24 +36,24 @@ extern int exit_timer;
 /** length of BIP44 path, in bytes */
 #define  BIP44_BYTE_LENGTH (BIP44_PATH_LEN * sizeof(unsigned int))
 
+/** max number of lines of text to display */
+#define NUM_TEXT_DISPLAY_LINES 3
+
+/** max width of lines of text to display */
+#define NUM_TEXT_DISPLAY_WIDTH 18
+
 /**
  * Nano S has 320 KB flash, 10 KB RAM, uses a ST31H320 chip.
  * This effectively limits the max size
  */
-#define MAX_TX_RAW_LENGTH 217
-
-/** max width of a single line of iconified text. */
-#define MAX_TX_ICON_WIDTH 21
-
-/** max lines of iconified text to display. */
-#define MAX_TX_ICON_LINES 3
+#define MAX_TX_RAW_LENGTH 512
 
 /** max digits of amount */
 #define MAX_TX_AMOUNT_DIGITS 40
 
 /** UI currently displayed */
 enum UI_STATE {
-	UI_INIT, UI_IDLE, UI_SIGN, UI_TX_ADDR, UX_TX_AMT, UI_DENY, UI_PUBLIC_KEY
+	UI_INIT, UI_IDLE, UI_SIGN, UI_TX_ADDR, UX_TX_AMT, UI_DENY, UI_PUBLIC_KEY_1, UI_PUBLIC_KEY_2
 };
 
 /** UI state enum */
@@ -63,6 +64,15 @@ extern ux_state_t ux;
 
 /** notification to refresh the view, if we are displaying data on the current view */
 extern unsigned char viewNeedsRefresh;
+
+/** current public key text. */
+extern char current_public_key_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
+
+/** current transaction address display. */
+extern char current_tx_address_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
+
+/** current transaction amount text. */
+extern char current_tx_amount_text[MAX_TX_AMOUNT_DIGITS];
 
 /** raw transaction data. */
 extern unsigned char raw_tx[MAX_TX_RAW_LENGTH];
@@ -75,12 +85,6 @@ extern unsigned int raw_tx_len;
 
 /** ed25519 signature */
 extern ed25519_signature sig;
-
-/** currently displayed public key */
-extern bagl_icon_details_t current_public_key[MAX_TX_ICON_LINES][MAX_TX_ICON_WIDTH];
-
-/** currently displayed transaction address */
-extern bagl_icon_details_t current_tx_address[MAX_TX_ICON_LINES][MAX_TX_ICON_WIDTH];
 
 /** process a partial transaction */
 const bagl_element_t * io_seproxyhal_touch_approve(const bagl_element_t *e);

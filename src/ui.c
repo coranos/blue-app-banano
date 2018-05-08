@@ -8,6 +8,9 @@
 /** default font */
 #define DEFAULT_FONT BAGL_FONT_OPEN_SANS_EXTRABOLD_11px | BAGL_FONT_ALIGNMENT_CENTER
 
+/** description font */
+#define DESCRIPTION_FONT BAGL_FONT_OPEN_SANS_REGULAR_11px | BAGL_FONT_ALIGNMENT_LEFT
+
 /** the idle screen icon */
 bagl_icon_details_t C_icon_idle;
 
@@ -23,6 +26,15 @@ ux_state_t ux;
 /** notification to refresh the view, if we are displaying the public key */
 unsigned char viewNeedsRefresh;
 
+/** current public key text. */
+char current_public_key_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
+
+/** current transaction address display. */
+char current_tx_address_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
+
+/** current transaction amount text. */
+char current_tx_amount_text[MAX_TX_AMOUNT_DIGITS];
+
 /** raw transaction data. */
 unsigned char raw_tx[MAX_TX_RAW_LENGTH];
 
@@ -34,12 +46,6 @@ unsigned int raw_tx_len;
 
 /** ed25519 signature */
 ed25519_signature sig;
-
-/** currently displayed public key */
-bagl_icon_details_t current_public_key[MAX_TX_ICON_LINES][MAX_TX_ICON_WIDTH];
-
-/** currently displayed transaction address */
-bagl_icon_details_t current_tx_address[MAX_TX_ICON_LINES][MAX_TX_ICON_WIDTH];
 
 /** UI was touched indicating the user wants to exit the app */
 static const bagl_element_t * io_seproxyhal_touch_exit(const bagl_element_t *e);
@@ -60,7 +66,10 @@ void ui_sign(void);
 static void ui_deny(void);
 
 /** show the public key screen */
-static void ui_public_key(void);
+static void ui_public_key_1(void);
+
+/** show the public key screen */
+static void ui_public_key_2(void);
 
 /** move up in the transaction description list */
 static const bagl_element_t * tx_desc_up(const bagl_element_t *e);
@@ -91,7 +100,7 @@ static const bagl_element_t bagl_ui_idle_nanos[] = {
 static unsigned int bagl_ui_idle_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
-		ui_public_key();
+		ui_public_key_1();
 		break;
 	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
 		io_seproxyhal_touch_exit(NULL);
@@ -101,84 +110,24 @@ static unsigned int bagl_ui_idle_nanos_button(unsigned int button_mask, unsigned
 	return 0;
 }
 
-#define LINE_1_OFFSET 2
-#define LINE_2_OFFSET 12
-#define LINE_3_OFFSET 22
+#define LINE_1_OFFSET 19
+#define LINE_2_OFFSET 30
+#define LINE_X_INDENT 20
 
 /** UI struct for the public key screen */
-static const bagl_element_t bagl_ui_public_key_nanos[] = {
+static const bagl_element_t bagl_ui_public_key_nanos_1[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
 	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 	/* first line of description of current public key */
-	{ { BAGL_ICON, 0x00, 00, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][0], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 06, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][1], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 12, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][2], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 18, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][3], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 24, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][4], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 30, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][5], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 36, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][6], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 42, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][7], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 48, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][8], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 54, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][9], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 60, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][10], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 66, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][11], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 72, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][12], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 78, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][13], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 84, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][14], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 90, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][15], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 96, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][16], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,102, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][17], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,108, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][18], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,114, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][19], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,120, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[0][20], 0, 0, 0, NULL, NULL, NULL, },
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_public_key_display[0], 0, 0, 0, NULL, NULL, NULL, },
 	/* second line of description of current public key */
-	{ { BAGL_ICON, 0x00, 00, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][0], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 06, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][1], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 12, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][2], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 18, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][3], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 24, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][4], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 30, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][5], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 36, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][6], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 42, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][7], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 48, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][8], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 54, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][9], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 60, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][10], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 66, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][11], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 72, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][12], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 78, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][13], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 84, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][14], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 90, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][15], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 96, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][16], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,102, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][17], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,108, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][18], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,114, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][19], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,120, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[1][20], 0, 0, 0, NULL, NULL, NULL, },
-	/* third line of description of current public key */
-	{ { BAGL_ICON, 0x00, 00, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][0], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 06, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][1], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 12, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][2], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 18, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][3], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 24, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][4], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 30, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][5], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 36, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][6], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 42, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][7], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 48, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][8], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 54, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][9], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 60, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][10], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 66, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][11], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 72, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][12], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 78, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][13], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 84, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][14], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 90, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][15], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 96, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][16], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,102, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][17], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,108, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][18], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,114, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][19], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,120, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_public_key[2][20], 0, 0, 0, NULL, NULL, NULL, },
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_public_key_display[1], 0, 0, 0, NULL, NULL, NULL, },
 	/* top right bar */
 	{ { BAGL_RECTANGLE, 0x00, 113, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* left icon is up arrow  */
+	{ { BAGL_ICON, 0x00, 5, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 /* */
 };
 
@@ -187,10 +136,48 @@ static const bagl_element_t bagl_ui_public_key_nanos[] = {
  *
  * exit on Left button, or on Both buttons. Do nothing on Right button only.
  */
-static unsigned int bagl_ui_public_key_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
+static unsigned int bagl_ui_public_key_nanos_1_button(unsigned int button_mask, unsigned int button_mask_counter) {
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
 		ui_idle();
+		break;
+	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
+		ui_public_key_2();
+		break;
+	}
+	return 0;
+}
+
+
+/** UI struct for the public key screen */
+static const bagl_element_t bagl_ui_public_key_nanos_2[] = {
+// { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
+// text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
+// },
+	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* first line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_public_key_display[1], 0, 0, 0, NULL, NULL, NULL, },
+	/* second line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_public_key_display[2], 0, 0, 0, NULL, NULL, NULL, },
+	/* top right bar */
+	{ { BAGL_RECTANGLE, 0x00, 113, 1, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* left icon is up arrow  */
+	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+/* */
+};
+
+/**
+ * buttons for the idle screen
+ *
+ * exit on Left button, or on Both buttons. Do nothing on Right button only.
+ */
+static unsigned int bagl_ui_public_key_nanos_2_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	switch (button_mask) {
+	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
+		ui_idle();
+		break;
+	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
+		ui_public_key_1();
 		break;
 	}
 	return 0;
@@ -251,6 +238,7 @@ static const bagl_element_t bagl_ui_deny_nanos[] = {
 	{ { BAGL_LABELINE, 0x02, 0, 20, 128, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DEFAULT_FONT, 0 }, "Deny Tx", 0, 0, 0, NULL, NULL, NULL, },
 	/* left icon is up arrow  */
 	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* right icon is down arrow  */
 	{ { BAGL_ICON, 0x00, 117, 13, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 /* */
 };
@@ -283,80 +271,15 @@ static const bagl_element_t bagl_ui_tx_address_nanos[] = {
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
 	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
-	/* first line of description of current public key */
-	{ { BAGL_ICON, 0x00, 00, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][0], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 06, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][1], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 12, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][2], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 18, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][3], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 24, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][4], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 30, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][5], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 36, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][6], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 42, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][7], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 48, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][8], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 54, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][9], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 60, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][10], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 66, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][11], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 72, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][12], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 78, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][13], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 84, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][14], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 90, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][15], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 96, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][16], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,102, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][17], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,108, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][18], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,114, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][19], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,120, LINE_1_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[0][20], 0, 0, 0, NULL, NULL, NULL, },
-	/* second line of description of current public key */
-	{ { BAGL_ICON, 0x00, 00, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][0], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 06, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][1], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 12, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][2], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 18, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][3], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 24, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][4], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 30, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][5], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 36, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][6], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 42, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][7], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 48, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][8], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 54, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][9], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 60, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][10], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 66, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][11], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 72, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][12], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 78, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][13], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 84, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][14], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 90, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][15], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 96, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][16], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,102, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][17], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,108, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][18], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,114, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][19], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,120, LINE_2_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[1][20], 0, 0, 0, NULL, NULL, NULL, },
-	/* third line of description of current public key */
-	{ { BAGL_ICON, 0x00, 00, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][0], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 06, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][1], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 12, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][2], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 18, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][3], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 24, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][4], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 30, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][5], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 36, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][6], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 42, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][7], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 48, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][8], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 54, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][9], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 60, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][10], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 66, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][11], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 72, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][12], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 78, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][13], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 84, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][14], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 90, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][15], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00, 96, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][16], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,102, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][17], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,108, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][18], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,114, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][19], 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_ICON, 0x00,120, LINE_3_OFFSET, 6, 10, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address[2][20], 0, 0, 0, NULL, NULL, NULL, },
+	/* first line of description of current address */
+	{ { BAGL_ICON, 0x00, 00, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address_display[0], 0, 0, 0, NULL, NULL, NULL, },
+	/* second line of description of current address */
+	{ { BAGL_ICON, 0x00, 00, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0x000000, 0xFFFFFF, 0, 0}, (const char *)&current_tx_address_display[1], 0, 0, 0, NULL, NULL, NULL, },
 
-	/* top left bar */
-	{ { BAGL_RECTANGLE, 0x00, 3, 1, 12, 1, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_RECTANGLE, 0x00, 5, 2,  8, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
-
-	/* top right bar */
-	{ { BAGL_RECTANGLE, 0x00, 115, 1,  8, 1, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
-	{ { BAGL_RECTANGLE, 0x00, 113, 2, 12, 2, 0, 0, BAGL_FILL, 0xFFFFFF, 0x000000, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* left icon is up arrow  */
+	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* right icon is down arrow  */
+	{ { BAGL_ICON, 0x00, 117, 13, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 
 /* */
 };
@@ -506,16 +429,28 @@ static const bagl_element_t *io_seproxyhal_touch_deny(const bagl_element_t *e) {
 	return 0; // do not redraw the widget
 }
 
-/** show the public key screen */
-void ui_public_key(void) {
-	uiState = UI_PUBLIC_KEY;
+/** show the public key screen 1 */
+void ui_public_key_1(void) {
+	uiState = UI_PUBLIC_KEY_1;
 	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
 		// TODO: add screen for the blue.
 		THROW(0x6DBL);
 	} else {
-		UX_DISPLAY(bagl_ui_public_key_nanos, NULL);
+		UX_DISPLAY(bagl_ui_public_key_nanos_1, NULL);
 	}
 }
+
+/** show the public key screen 1 */
+void ui_public_key_2(void) {
+	uiState = UI_PUBLIC_KEY_2;
+	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
+		// TODO: add screen for the blue.
+		THROW(0x6DBL);
+	} else {
+		UX_DISPLAY(bagl_ui_public_key_nanos_2, NULL);
+	}
+}
+
 
 /** show the idle screen. */
 void ui_idle(void) {

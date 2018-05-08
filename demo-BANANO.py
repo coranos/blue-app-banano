@@ -35,44 +35,52 @@ textToSignArray = [textToSign_01]
 
 dongle = getDongle(True)
 
-print ("STARTED privateKey ")
-privateKey = dongle.exchange(bytes(bytearray.fromhex("80050000FF"+ bipp44_path)))
-actualPrivateKey = privateKey.hex().upper()
-expectPrivateKey = "55BCF45FFD718D8939FB798AAD5B5C8C55D3F08E42507D0D8479F50AB648639E"
-print ("ACTUAL privateKey " + actualPrivateKey)
-print ("EXPECT privateKey " + expectPrivateKey)
-print ("MATCH? privateKey " + str(actualPrivateKey == expectPrivateKey))
+#print ("STARTED privateKey ")
+#privateKey = dongle.exchange(bytes(bytearray.fromhex("80050000FF"+ bipp44_path)))
+#actualPrivateKey = privateKey.hex().upper()
+#expectPrivateKey = "55BCF45FFD718D8939FB798AAD5B5C8C55D3F08E42507D0D8479F50AB648639E"
+#print ("ACTUAL privateKey " + actualPrivateKey)
+#print ("EXPECT privateKey " + expectPrivateKey)
+#print ("MATCH? privateKey " + str(actualPrivateKey == expectPrivateKey))
 
-print ("STARTED publicKey ")
+print ("STARTED publicKey[1] ")
 publicKey = dongle.exchange(bytes(bytearray.fromhex("80040000FF"+ bipp44_path)))
 actualPublicKey = publicKey.hex().upper()
 expectPublicKey = "0AD1D5CB2DB69BFE31560ED1909135D6D5FA6A471D35FD9B1424C84CA68B9C40"
-print ("ACTUAL publicKey " + actualPublicKey)
-print ("EXPECT publicKey " + expectPublicKey)
-print ("MATCH? publicKey " + str(actualPublicKey == expectPublicKey))
+print ("ACTUAL publicKey[1] " + actualPublicKey)
+print ("EXPECT publicKey[1] " + expectPublicKey)
+print ("MATCH? publicKey[1] " + str(actualPublicKey == expectPublicKey))
 
-print ("STARTED sending transactions (sign on device)")
+print ("STARTED publicKey[2] ")
+publicKey = dongle.exchange(bytes(bytearray.fromhex("80040000FF"+ bipp44_path)))
+actualPublicKey = publicKey.hex().upper()
+expectPublicKey = "0AD1D5CB2DB69BFE31560ED1909135D6D5FA6A471D35FD9B1424C84CA68B9C40"
+print ("ACTUAL publicKey[2] " + actualPublicKey)
+print ("EXPECT publicKey[2] " + expectPublicKey)
+print ("MATCH? publicKey[2] " + str(actualPublicKey == expectPublicKey))
 
-for textToSign in textToSignArray:
-	try:
-		offset = 0
-		while offset != len(textToSign):
-			if (len(textToSign) - offset) > 255:
-				chunk = textToSign[offset : offset + 255] 
-			else:
-				chunk = textToSign[offset:]
-			if (offset + len(chunk)) == len(textToSign):
-				p1 = 0x80
-			else:
-				p1 = 0x00
-			apdu = bytes(bytearray.fromhex("8002")) + p1.to_bytes(1, byteorder='big') + 0x00.to_bytes(1, byteorder='big') + len(chunk).to_bytes(1, byteorder='big') + bytes(chunk)
-			signature = dongle.exchange(apdu)
-			offset += len(chunk)  	
-		print ("signature " + signature.hex().upper())
-	except CommException as comm:
-		if comm.sw == 0x6985:
-			print ("Aborted by user")
-		else:
-			print ("Invalid status " + hex(comm.sw))
-
-print ("SUCCESS sending transactions ")
+# print ("STARTED sending transactions (sign on device)")
+#
+# for textToSign in textToSignArray:
+# 	try:
+# 		offset = 0
+# 		while offset != len(textToSign):
+# 			if (len(textToSign) - offset) > 255:
+# 				chunk = textToSign[offset : offset + 255]
+# 			else:
+# 				chunk = textToSign[offset:]
+# 			if (offset + len(chunk)) == len(textToSign):
+# 				p1 = 0x80
+# 			else:
+# 				p1 = 0x00
+# 			apdu = bytes(bytearray.fromhex("8002")) + p1.to_bytes(1, byteorder='big') + 0x00.to_bytes(1, byteorder='big') + len(chunk).to_bytes(1, byteorder='big') + bytes(chunk)
+# 			signature = dongle.exchange(apdu)
+# 			offset += len(chunk)
+# 		print ("signature " + signature.hex().upper())
+# 	except CommException as comm:
+# 		if comm.sw == 0x6985:
+# 			print ("Aborted by user")
+# 		else:
+# 			print ("Invalid status " + hex(comm.sw))
+#
+# print ("SUCCESS sending transactions ")
