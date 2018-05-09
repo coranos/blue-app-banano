@@ -28,11 +28,46 @@ bipp44_path = (
 
 # sending to AHXSMB19pWytwJ7vzvCw5aWmd1DUniDKRT
 
-# blank tx
+# # blank tx
 # textToSign_01 = bytes(bytearray.fromhex(
-# "80028000000000000000000000000000000000000000000000000000000000000000000000" + bipp44_path + ""))
+#     "80028000340000000000000000000000000000000000000000000000000000000000000000" + bipp44_path + ""))
+
+# parent(32), link(32), rep(32), balance(16)
+# tx with small amount, wide range
 textToSign_01 = bytes(bytearray.fromhex(
-    "80028000343D6AD425971738FD0C1B8C006B4885D38EDEF802D2ACB8DCAB30933154F6962B" + bipp44_path + ""))
+    "80028000"
+    # length
+    + "70"
+
+    # parent
+    #           1         2         3         4         5         6
+    #  1234567890123456789012345678901234567890123456789012345678901234
+    + "0000000000000000000000000000000000000000000000000000000000000000"
+
+    # link
+    + "0000000000000000000000000000000000000000000000000000000000000000"
+
+    # rep
+    + "0000000000000000000000000000000000000000000000000000000000000000"
+
+    # balance
+    #           1         2         3  
+    #  12345678901234567890123456789012
+    + "01010101010101010101010101010101"
+
+    # bip44 path
+    + bipp44_path))
+
+# tx with small amount, 0x6d14 error
+# textToSign_01 = bytes(bytearray.fromhex(
+#     "800280003400000000000000000000FF060102030405000708090A0B0C0D00000000000000" + bipp44_path + ""))
+
+# # tx with small amount, 0x6d14 error, going from 99 to 100.
+# textToSign_01 = bytes(bytearray.fromhex(
+#     "800280003400000000000000000000FF016302030405000708090A0B0C0D00000000000000" + bipp44_path + ""))
+
+# textToSign_01 = bytes(bytearray.fromhex(
+#   "80028000343D6AD425971738FD0C1B8C006B4885D38EDEF802D2ACB8DCAB30933154F6962B" + bipp44_path + ""))
 # textToSign_01 = bytes(bytearray.fromhex(
 #   "80028000343D6AD425971738FD0C1B8CAA6B4885D38EDEF802D2ACB8DCAB30933154F6962B" + bipp44_path + ""))
 # textToSign_01 = bytes(bytearray.fromhex(

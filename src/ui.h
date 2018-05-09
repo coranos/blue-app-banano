@@ -54,15 +54,37 @@ extern int exit_timer;
 /** max digits of address */
 #define MAX_TX_ADDRESS_DIGITS 64
 
-/** number of banano in a raw. 1000000000000000000000000000 */
-/**                             123456789012345678901234567*/
-#define TX_AMOUNT_BANANO_RAW_DIGITS 27
+#define TX_AMOUNT_BANANO_RAW_DIGITS 30
+/** number of banano in a raw.  100000000000000000000000000000 */
+/**                             123456789012345678901234567890 */
 
-/** byte length of amount */
+/** number of banoshi in a raw. 1000000000000000000000000000 */
+/**                             1234567890123456789012345678 */
+#define TX_AMOUNT_BANOSHI_RAW_DIGITS 28
+
+/** state blocks */
+/**
+ *	parent(32),
+ *	link(32) (sourceBlock / recipient),
+ *	representative(32),
+ *	balance(16)
+ */
+
+/** byte offset and length of parent */
+#define TX_PARENT_BYTE_OFFSET 0
+#define TX_PARENT_BYTE_LENGTH 32
+
+/** byte offset and length of link (sourceBlock / recipient) */
+#define TX_LINK_BYTE_OFFSET TX_PARENT_BYTE_OFFSET+TX_PARENT_BYTE_LENGTH
+#define TX_LINK_BYTE_LENGTH 32
+
+/** byte offset and length of representative */
+#define TX_REP_BYTE_OFFSET TX_LINK_BYTE_OFFSET+TX_LINK_BYTE_LENGTH
+#define TX_REP_BYTE_LENGTH 32
+
+/** byte offset and length of amount */
+#define TX_AMOUNT_BYTE_OFFSET TX_REP_BYTE_OFFSET+TX_REP_BYTE_LENGTH
 #define TX_AMOUNT_BYTE_LENGTH 16
-
-/** byte offset of amount */
-#define TX_AMOUNT_BYTE_OFFSET 16
 
 /** max digits of amount */
 #define MAX_TX_AMOUNT_DIGITS 40
@@ -85,14 +107,14 @@ extern unsigned char viewNeedsRefresh;
 /** current public key text. */
 extern char current_public_key_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
 
-/** current transaction address display. */
+/** current transaction address display. +1 for zero end.*/
 extern char current_tx_address_display[MAX_TX_ADDRESS_DIGITS+1];
 
-/** current transaction amount text. */
+/** current transaction amount text. +1 for zero end.*/
 extern char current_tx_amount_text[MAX_TX_AMOUNT_DIGITS+1];
 
-/** current transaction amount text, in banoshi. */
-extern char current_tx_amount_text_banoshi[(MAX_TX_AMOUNT_DIGITS+1)-TX_AMOUNT_BANANO_RAW_DIGITS];
+/** current transaction amount text, in banoshi. +1 for zero end, +1 for decimal place. */
+extern char current_tx_amount_text_banoshi[(MAX_TX_AMOUNT_DIGITS+2)-TX_AMOUNT_BANANO_RAW_DIGITS];
 
 /** raw transaction data. */
 extern unsigned char raw_tx[MAX_TX_RAW_LENGTH];

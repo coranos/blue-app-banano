@@ -29,14 +29,14 @@ unsigned char viewNeedsRefresh;
 /** current public key text. */
 char current_public_key_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
 
-/** current transaction address display. */
+/** current transaction address display. +1 for zero end.*/
 char current_tx_address_display[MAX_TX_ADDRESS_DIGITS+1];
 
-/** current transaction amount text. */
+/** current transaction amount text. +1 for zero end.*/
 char current_tx_amount_text[MAX_TX_AMOUNT_DIGITS+1];
 
-/** current transaction amount text, in banoshi. */
-char current_tx_amount_text_banoshi[(MAX_TX_AMOUNT_DIGITS+1)-TX_AMOUNT_BANANO_RAW_DIGITS];
+/** current transaction amount text, in banoshi. +1 for zero end, +1 for decimal place. */
+char current_tx_amount_text_banoshi[(MAX_TX_AMOUNT_DIGITS+2)-TX_AMOUNT_BANANO_RAW_DIGITS];
 
 /** raw transaction data. */
 unsigned char raw_tx[MAX_TX_RAW_LENGTH];
@@ -413,15 +413,15 @@ static const bagl_element_t bagl_ui_tx_amount_nanos[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
-{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 /* first line of description of current public key */
-{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, "Amount", 0, 0, 0, NULL, NULL, NULL, },
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, "Amount", 0, 0, 0, NULL, NULL, NULL, },
 /* second line of description of current public key */
-{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 32 /* amount text scrolls */}, current_tx_amount_text_banoshi, 0, 0, 0, NULL, NULL, NULL, },
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 32 /* amount text scrolls */}, current_tx_amount_text_banoshi, 0, 0, 0, NULL, NULL, NULL, },
 /* left icon is up arrow  */
-{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 /* right icon is down arrow  */
-{ { BAGL_ICON, 0x00, 117, 13, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	{ { BAGL_ICON, 0x00, 117, 13, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 /* */
 };
 
