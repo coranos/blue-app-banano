@@ -329,6 +329,12 @@ unsigned char io_event(unsigned char channel) {
 
 	case SEPROXYHAL_TAG_TICKER_EVENT:
 //		UX_REDISPLAY();
+		// if(UI_TX_ADDR) {
+		// 	viewNeedsRefresh = 1;
+		// }
+		// if(UX_TX_AMT) {
+		// 	viewNeedsRefresh = 1;
+		// }
 		Timer_Tick();
 		if (viewNeedsRefresh == 1) {
 			UX_REDISPLAY();

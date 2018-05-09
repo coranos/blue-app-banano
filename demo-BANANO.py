@@ -1,35 +1,42 @@
 #!/usr/bin/env python
-#*******************************************************************************
-#*   Ledger Blue
-#*   (c) 2016 Ledger
-#*
-#*  Licensed under the Apache License, Version 2.0 (the "License");
-#*  you may not use this file except in compliance with the License.
-#*  You may obtain a copy of the License at
-#*
-#*      http://www.apache.org/licenses/LICENSE-2.0
-#*
-#*  Unless required by applicable law or agreed to in writing, software
-#*  distributed under the License is distributed on an "AS IS" BASIS,
-#*  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#*  See the License for the specific language governing permissions and
-#*  limitations under the License.
-#********************************************************************************
+# *******************************************************************************
+# *   Ledger Blue
+# *   (c) 2016 Ledger
+# *
+# *  Licensed under the Apache License, Version 2.0 (the "License");
+# *  you may not use this file except in compliance with the License.
+# *  You may obtain a copy of the License at
+# *
+# *      http://www.apache.org/licenses/LICENSE-2.0
+# *
+# *  Unless required by applicable law or agreed to in writing, software
+# *  distributed under the License is distributed on an "AS IS" BASIS,
+# *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# *  See the License for the specific language governing permissions and
+# *  limitations under the License.
+# ********************************************************************************
 from ledgerblue.comm import getDongle
 from ledgerblue.commException import CommException
 import binascii
 
 bipp44_path = (
-               "8000002C"
-              +"800000a5"
-              +"80000000"
-              +"80000000"
-              +"80000000")
+    "8000002C"
+    + "800000a5"
+    + "80000000"
+    + "80000000"
+    + "80000000")
 
 # sending to AHXSMB19pWytwJ7vzvCw5aWmd1DUniDKRT
 
 # blank tx
-textToSign_01 = bytes(bytearray.fromhex("80028000744284F08CA8FE206FE6854E21AA69163FEAFAE248F0A8D53E4FAE700B26122B613FE80B4BC842E82C1C18ABFEEC47EA989E63953BC82AC411F304D13833D52A560ad1d5cb2db69bfe31560ed1909135d6d5fa6a471d35fd9b1424c84ca68b9c40" + bipp44_path + ""))
+# textToSign_01 = bytes(bytearray.fromhex(
+# "80028000000000000000000000000000000000000000000000000000000000000000000000" + bipp44_path + ""))
+textToSign_01 = bytes(bytearray.fromhex(
+    "80028000343D6AD425971738FD0C1B8C006B4885D38EDEF802D2ACB8DCAB30933154F6962B" + bipp44_path + ""))
+# textToSign_01 = bytes(bytearray.fromhex(
+#   "80028000343D6AD425971738FD0C1B8CAA6B4885D38EDEF802D2ACB8DCAB30933154F6962B" + bipp44_path + ""))
+# textToSign_01 = bytes(bytearray.fromhex(
+#   "80028000343D6AD425971738FD0C1B8CAA6B4885D38EDEF802D2ACB8DCAB30933154F6962B" + bipp44_path + ""))
 
 textToSignArray = [textToSign_01]
 
@@ -43,44 +50,48 @@ dongle = getDongle(True)
 #print ("EXPECT privateKey " + expectPrivateKey)
 #print ("MATCH? privateKey " + str(actualPrivateKey == expectPrivateKey))
 
-print ("STARTED publicKey[1] ")
-publicKey = dongle.exchange(bytes(bytearray.fromhex("80040000FF"+ bipp44_path)))
+print("STARTED publicKey[1] ")
+publicKey = dongle.exchange(
+    bytes(bytearray.fromhex("80040000FF" + bipp44_path)))
 actualPublicKey = publicKey.hex().upper()
 expectPublicKey = "0AD1D5CB2DB69BFE31560ED1909135D6D5FA6A471D35FD9B1424C84CA68B9C40"
-print ("ACTUAL publicKey[1] " + actualPublicKey)
-print ("EXPECT publicKey[1] " + expectPublicKey)
-print ("MATCH? publicKey[1] " + str(actualPublicKey == expectPublicKey))
+print("ACTUAL publicKey[1] " + actualPublicKey)
+print("EXPECT publicKey[1] " + expectPublicKey)
+print("MATCH? publicKey[1] " + str(actualPublicKey == expectPublicKey))
 
-print ("STARTED publicKey[2] ")
-publicKey = dongle.exchange(bytes(bytearray.fromhex("80040000FF"+ bipp44_path)))
+print("STARTED publicKey[2] ")
+publicKey = dongle.exchange(
+    bytes(bytearray.fromhex("80040000FF" + bipp44_path)))
 actualPublicKey = publicKey.hex().upper()
 expectPublicKey = "0AD1D5CB2DB69BFE31560ED1909135D6D5FA6A471D35FD9B1424C84CA68B9C40"
-print ("ACTUAL publicKey[2] " + actualPublicKey)
-print ("EXPECT publicKey[2] " + expectPublicKey)
-print ("MATCH? publicKey[2] " + str(actualPublicKey == expectPublicKey))
+print("ACTUAL publicKey[2] " + actualPublicKey)
+print("EXPECT publicKey[2] " + expectPublicKey)
+print("MATCH? publicKey[2] " + str(actualPublicKey == expectPublicKey))
 
 # print ("STARTED sending transactions (sign on device)")
 #
-# for textToSign in textToSignArray:
-# 	try:
-# 		offset = 0
-# 		while offset != len(textToSign):
-# 			if (len(textToSign) - offset) > 255:
-# 				chunk = textToSign[offset : offset + 255]
-# 			else:
-# 				chunk = textToSign[offset:]
-# 			if (offset + len(chunk)) == len(textToSign):
-# 				p1 = 0x80
-# 			else:
-# 				p1 = 0x00
-# 			apdu = bytes(bytearray.fromhex("8002")) + p1.to_bytes(1, byteorder='big') + 0x00.to_bytes(1, byteorder='big') + len(chunk).to_bytes(1, byteorder='big') + bytes(chunk)
-# 			signature = dongle.exchange(apdu)
-# 			offset += len(chunk)
-# 		print ("signature " + signature.hex().upper())
-# 	except CommException as comm:
-# 		if comm.sw == 0x6985:
-# 			print ("Aborted by user")
-# 		else:
-# 			print ("Invalid status " + hex(comm.sw))
-#
-# print ("SUCCESS sending transactions ")
+for textToSign in textToSignArray:
+    try:
+        offset = 0
+        while offset != len(textToSign):
+            if (len(textToSign) - offset) > 255:
+                chunk = textToSign[offset: offset + 255]
+            else:
+                chunk = textToSign[offset:]
+            if (offset + len(chunk)) == len(textToSign):
+                p1 = 0x80
+            else:
+                p1 = 0x00
+            apdu = bytes(bytearray.fromhex("8002")) + p1.to_bytes(1, byteorder='big') \
+                + 0x00.to_bytes(1, byteorder='big') + \
+                len(chunk).to_bytes(1, byteorder='big') + bytes(chunk)
+            signature = dongle.exchange(apdu)
+            offset += len(chunk)
+        print("signature " + signature.hex().upper())
+    except CommException as comm:
+        if comm.sw == 0x6985:
+            print("Aborted by user")
+        else:
+            print("Invalid status " + hex(comm.sw))
+
+print("SUCCESS sending transactions ")

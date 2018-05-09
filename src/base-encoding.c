@@ -28,51 +28,82 @@ unsigned int encode_base_32(const void *in, const unsigned int in_length, char *
 	return encode_base_x(BASE_32_ALPHABET, sizeof(BASE_32_ALPHABET), in, in_length, out, out_length);
 }
 
+#define TMP_SIZE 64
+
+#define BUFFER_SIZE 128
+
 /** encodes in_length bytes from in into the given base, using the given alphabet. writes the converted bytes to out, stopping when it converts out_length bytes. */
 static unsigned int encode_base_x(const char * alphabet, const unsigned int alphabet_len, const void * in, const unsigned int in_length, char * out,
                                   const unsigned int out_length) {
-	char tmp[64];
-	char buffer[128];
-	unsigned char buffer_ix;
-	unsigned char startAt;
-	unsigned char zeroCount = 0;
-	if (in_length > sizeof(tmp)) {
+	char tmp[TMP_SIZE];
+	char buffer[BUFFER_SIZE];
+	int inLength = in_length;
+	int outLength = out_length;
+	int alphabetLen = alphabet_len;
+	int bufferIx;
+	int startAt;
+	int zeroCount = 0;
+
+	if (inLength > TMP_SIZE) {
 		THROW(0x6D11);
 	}
-	os_memmove(tmp, in, in_length);
-	while ((zeroCount < in_length) && (tmp[zeroCount] == 0)) {
+	os_memmove(tmp, in, inLength);
+	while ((zeroCount < inLength) && (tmp[zeroCount] == 0)) {
 		++zeroCount;
 	}
-	buffer_ix = 2 * in_length;
-	if (buffer_ix > sizeof(buffer)) {
+	// if (alphabet_len == 10) {
+		// THROW(0x6D20 + zeroCount);
+	// }
+	bufferIx = 2 * inLength;
+	if (bufferIx > BUFFER_SIZE) {
 		THROW(0x6D12);
 	}
 
 	startAt = zeroCount;
-	while (startAt < in_length) {
-		unsigned short remainder = 0;
-		unsigned char divLoop;
-		for (divLoop = startAt; divLoop < in_length; divLoop++) {
+	while (startAt < inLength) {
+		short remainder = 0;
+		int divLoop;
+		for (divLoop = startAt; divLoop < inLength; divLoop++) {
 			unsigned short digit256 = (unsigned short) (tmp[divLoop] & 0xff);
 			unsigned short tmpDiv = remainder * 256 + digit256;
-			tmp[divLoop] = (unsigned char) (tmpDiv / alphabet_len);
-			remainder = (tmpDiv % alphabet_len);
+			tmp[divLoop] = (unsigned char) (tmpDiv / alphabetLen);
+			remainder = (tmpDiv % alphabetLen);
 		}
 		if (tmp[startAt] == 0) {
 			++startAt;
 		}
-		buffer[--buffer_ix] = *(alphabet + remainder);
+		if (remainder >= alphabetLen) {
+			THROW(0x6D21);
+		}
+		if (bufferIx < 0) {
+			THROW(0x6D22);
+		}
+		buffer[--bufferIx] = *(alphabet + remainder);
 	}
-	while ((buffer_ix < (2 * in_length)) && (buffer[buffer_ix] == *(alphabet + 0))) {
-		++buffer_ix;
+
+	while ((bufferIx < (2 * inLength)) && (buffer[bufferIx] == *(alphabet + 0))) {
+		++bufferIx;
 	}
 	while (zeroCount-- > 0) {
-		buffer[--buffer_ix] = *(alphabet + 0);
+		if (bufferIx < 0) {
+			THROW(0x6D19);
+		}
+		buffer[--bufferIx] = *(alphabet + 0);
 	}
-	const unsigned int true_out_length = (2 * in_length) - buffer_ix;
-	if (true_out_length > out_length) {
+	if (bufferIx < 0) {
 		THROW(0x6D14);
 	}
-	os_memmove(out, (buffer + buffer_ix), true_out_length);
+	const int trueOutLength = (2 * inLength) - bufferIx;
+	if (trueOutLength < 0) {
+		THROW(0x6D15);
+	}
+	if (trueOutLength > outLength) {
+		THROW(0x6D16);
+	}
+	if(bufferIx >= BUFFER_SIZE) {
+		THROW(0x6D17);
+	}
+	os_memmove(out, (buffer + bufferIx), trueOutLength);
+	const unsigned int true_out_length = trueOutLength;
 	return true_out_length;
 }
