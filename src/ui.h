@@ -48,6 +48,19 @@ extern int exit_timer;
  */
 #define MAX_TX_RAW_LENGTH 512
 
+/** max digits of public key */
+#define MAX_PUBLIC_KEY_DIGITS 64
+
+/** max digits of address */
+#define MAX_TX_ADDRESS_DIGITS 64
+
+
+/** byte length of amount */
+#define TX_AMOUNT_BYTE_LENGTH 16
+
+/** byte offset of amount */
+#define TX_AMOUNT_BYTE_OFFSET 16
+
 /** max digits of amount */
 #define MAX_TX_AMOUNT_DIGITS 40
 
@@ -70,10 +83,10 @@ extern unsigned char viewNeedsRefresh;
 extern char current_public_key_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
 
 /** current transaction address display. */
-extern char current_tx_address_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
+extern char current_tx_address_display[MAX_TX_ADDRESS_DIGITS+1];
 
 /** current transaction amount text. */
-extern char current_tx_amount_text[MAX_TX_AMOUNT_DIGITS];
+extern char current_tx_amount_text[MAX_TX_AMOUNT_DIGITS+1];
 
 /** raw transaction data. */
 extern unsigned char raw_tx[MAX_TX_RAW_LENGTH];
