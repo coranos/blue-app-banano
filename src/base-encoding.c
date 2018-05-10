@@ -3,6 +3,7 @@
  */
 #include "base-encoding.h"
 #include "os.h"
+#include <stdbool.h>
 
 /** array of base10 aplhabet letters */
 static const char BASE_10_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
@@ -28,88 +29,114 @@ unsigned int encode_base_32(const void *in, const unsigned int in_length, char *
 	return encode_base_x(BASE_32_ALPHABET, sizeof(BASE_32_ALPHABET), in, in_length, out, out_length);
 }
 
-#define TMP_SIZE 64
+static unsigned int divide_and_remainder(const unsigned char * divided, const unsigned int divided_len,
+                                         unsigned char * dividend, const unsigned int dividend_len,
+                                         const unsigned int divisor, const unsigned int radix) {
+	unsigned int divided_part = 0;
+	unsigned int divided_index = 0;
+	while(divided_index < divided_len) {
+		if(divided_part < divisor) {
+			divided_part *= radix;
+			divided_part += *(divided + divided_index);
+			divided_index++;
+		} else {
+			unsigned int dividend_part = divided_part / divisor;
+			for(unsigned int c = 1; c < dividend_len; c++) {
+				*(dividend + (c-1)) = *(dividend + c);
+			}
+			*(dividend + (dividend_len-1)) = dividend_part;
+			divided_part -= dividend_part;
+		}
+	}
+	return divided_part;
+}
 
-#define BUFFER_SIZE 128
+#define BASEX_DIVISION_BUFFER_SIZE 128
+
+#define BASEX_DIVISION_RADIX 256
 
 /** encodes in_length bytes from in into the given base, using the given alphabet. writes the converted bytes to out, stopping when it converts out_length bytes.
-* algorithm:
-* 1) start with a number in base 256. say 0xFFEE (256,238). Convert it to base10 65518.
-* 2) start with the rightmost byte, divide and take the result and remainder.
-* 2.1) 238 divided by 10 is 23, remainder 8. store the remainder in the result => 8.
-* 2.2) 23 divided by 10 is 2, remainder 3. store the remainder in the result => 83.
-*/
-static unsigned int encode_base_x(const char * alphabet, const unsigned int alphabet_len, const void * in, const unsigned int in_length, char * out,
-                                  const unsigned int out_length) {
-	char tmp[TMP_SIZE];
-	char buffer[BUFFER_SIZE];
-	int inLength = in_length;
-	int outLength = out_length;
-	int alphabetLen = alphabet_len;
-	int bufferIx;
-	int startAt;
-	int zeroCount = 0;
+ * algorithm:
+ * 1) start with a input in base256 (in), and a divisor (alphabet_len).
+ * 2) Do long division, dividing the input by the divisor, saving the dividend_length, dividend and remainder.
+ * 3) look up the remainder in the alphabet, save it in the output.
+ * 4) if dividend_length = 0 return.
+ * 4) use the dividend as a new input
+ * 5) run steps 2,3,4 until the input
+ */
+static unsigned int encode_base_x(const char * alphabet, const unsigned int alphabet_len,
+                                  const void * in, const unsigned int in_len_raw,
+                                  char * out, const unsigned int out_len) {
+	unsigned char divided[BASEX_DIVISION_BUFFER_SIZE];
+	os_memset(divided,0x00,sizeof(divided));
 
-	if (inLength > TMP_SIZE) {
-		THROW(0x6D11);
-	}
-	os_memmove(tmp, in, inLength);
-	while ((zeroCount < inLength) && (tmp[zeroCount] == 0)) {
-		++zeroCount;
-	}
-	// if (alphabet_len == 10) {
-		// THROW(0x6D20 + zeroCount);
-	// }
-	bufferIx = 2 * inLength;
-	if (bufferIx > BUFFER_SIZE) {
+	unsigned char dividend[BASEX_DIVISION_BUFFER_SIZE];
+	os_memset(dividend,0x00,sizeof(dividend));
+
+	unsigned char remainders[BASEX_DIVISION_BUFFER_SIZE];
+	os_memset(remainders,0x00,sizeof(remainders));
+
+	if(out_len > BASEX_DIVISION_BUFFER_SIZE) {
 		THROW(0x6D12);
 	}
 
-	startAt = zeroCount;
-	while (startAt < inLength) {
-		short remainder = 0;
-		int divLoop;
-		for (divLoop = startAt; divLoop < inLength; divLoop++) {
-			unsigned short digit256 = (unsigned short) (tmp[divLoop] & 0xff);
-			unsigned short tmpDiv = remainder * 256 + digit256;
-			tmp[divLoop] = (unsigned char) (tmpDiv / alphabetLen);
-			remainder = (tmpDiv % alphabetLen);
+	const unsigned int remainders_offset = sizeof(remainders)-out_len;
+	const unsigned char * remainders_out = remainders + remainders_offset;
+
+	if(in_len_raw > BASEX_DIVISION_BUFFER_SIZE) {
+		THROW(0x6D12);
+	}
+	os_memmove(divided, in, in_len_raw);
+	unsigned int in_len = in_len_raw;
+	while ((in_len > 0) && (*divided == 0)) {
+		for(unsigned int c = 1; c < in_len; c++) {
+			*(divided + (c-1)) = *(divided + c);
 		}
-		if (tmp[startAt] == 0) {
-			++startAt;
-		}
-		if (remainder >= alphabetLen) {
-			THROW(0x6D21);
-		}
-		if (bufferIx < 0) {
-			THROW(0x6D22);
-		}
-		buffer[--bufferIx] = *(alphabet + remainder);
+		in_len--;
 	}
 
-	while ((bufferIx < (2 * inLength)) && (buffer[bufferIx] == *(alphabet + 0))) {
-		++bufferIx;
-	}
-	while (zeroCount-- > 0) {
-		if (bufferIx < 0) {
-			THROW(0x6D19);
+	const unsigned int divided_len = in_len;
+	const unsigned int dividend_len = in_len;
+	const unsigned int divisor = alphabet_len;
+	const unsigned int radix = BASEX_DIVISION_RADIX;
+
+	bool empty_divided = false;
+	while(!empty_divided) {
+		const unsigned int remainder =
+		  divide_and_remainder( divided,  divided_len,
+		                        dividend, dividend_len,
+		                        divisor, radix);
+		for(unsigned int c = 1; c < in_len; c++) {
+			*(remainders + (c-1)) = *(remainders + c);
 		}
-		buffer[--bufferIx] = *(alphabet + 0);
+		*(remainders + (in_len-1)) = remainder;
+
+		os_memmove(divided, dividend, in_len);
+
+		bool divided_all_zero = true;
+		for(unsigned int c = 0; c < in_len; c++) {
+			if(*(divided+c) != 0) {
+				divided_all_zero = false;
+			}
+		}
+		if(divided_all_zero) {
+			empty_divided = true;
+		}
 	}
-	if (bufferIx < 0) {
-		THROW(0x6D14);
+
+	for(unsigned int c = 0; c < out_len; c++) {
+		unsigned char remainder_out = *(remainders_out + c);
+		*(out+c) = *(alphabet + remainder_out);
 	}
-	const int trueOutLength = (2 * inLength) - bufferIx;
-	if (trueOutLength < 0) {
-		THROW(0x6D15);
-	}
-	if (trueOutLength > outLength) {
-		THROW(0x6D16);
-	}
-	if(bufferIx >= BUFFER_SIZE) {
-		THROW(0x6D17);
-	}
-	os_memmove(out, (buffer + bufferIx), trueOutLength);
-	const unsigned int true_out_length = trueOutLength;
-	return true_out_length;
+	return out_len;
+
+	// THROW(0x6D11);
+	// THROW(0x6D12);
+	// THROW(0x6D14);
+	// THROW(0x6D15);
+	// THROW(0x6D16);
+	// THROW(0x6D17);
+	// THROW(0x6D19);
+	// THROW(0x6D21);
+	// THROW(0x6D22);
 }
