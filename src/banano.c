@@ -86,7 +86,7 @@ void update_tx_address_data(void) {
 unsigned int min_tx_len(void) {
 	const unsigned int raw_tx_len_except_bip44_and_offset = raw_tx_len - (BIP44_BYTE_LENGTH + TX_AMOUNT_BYTE_OFFSET);
 	if(raw_tx_len_except_bip44_and_offset < TX_AMOUNT_BYTE_LENGTH) {
-		return raw_tx_len_except_bip44_and_offset;
+		THROW(0x6D23);
 	} else {
 		return TX_AMOUNT_BYTE_LENGTH;
 	}
@@ -107,26 +107,35 @@ void update_tx_amount_data(void) {
 	const void * in = (void *)current_tx_amount_char;
 	encode_base_10(in,in_length,current_tx_amount_text,sizeof(current_tx_amount_text));
 
-	const unsigned int banoshi_decimal_offset = TX_AMOUNT_BANANO_RAW_DIGITS - TX_AMOUNT_BANOSHI_RAW_DIGITS;
+	os_memset(current_tx_amount_text_banoshi,'\0',sizeof(current_tx_amount_text_banoshi));
 
 	const unsigned int banoshi_in_length = sizeof(current_tx_amount_text_banoshi);
-	const unsigned int banoshi_in_offset_pre_decimal = sizeof(current_tx_amount_text) - banoshi_in_length;
-	const unsigned int banoshi_in_length_pre_decimal = banoshi_in_length - (banoshi_decimal_offset + 1);
-	const unsigned int banoshi_in_length_post_decimal = banoshi_decimal_offset;
-	const unsigned int banoshi_in_offset_post_decimal = banoshi_in_offset_pre_decimal + banoshi_in_length_pre_decimal;
 
-	// set the amount before the decimal
-	const char * banoshi_in_pre_decimal = current_tx_amount_text + banoshi_in_offset_pre_decimal;
-	void * banoshi_out_pre_decimal = current_tx_amount_text_banoshi;
-	os_memmove(banoshi_out_pre_decimal,banoshi_in_pre_decimal,banoshi_in_length_pre_decimal);
+	/** displaying with no decimal */
+	const unsigned int banoshi_in_offset = sizeof(current_tx_amount_text) - banoshi_in_length;
+	const char * banoshi_in = current_tx_amount_text + banoshi_in_offset;
+	os_memmove(current_tx_amount_text_banoshi,banoshi_in,banoshi_in_offset);
 
-	// set the decimal
-	char * banoshi_out_decimal = current_tx_amount_text_banoshi + banoshi_in_length_pre_decimal;
-	*banoshi_out_decimal = '.';
+	/** calculating where to put the decimal */
+	// const unsigned int banoshi_decimal_offset = TX_AMOUNT_BANANO_RAW_DIGITS - TX_AMOUNT_BANOSHI_RAW_DIGITS;
 
-	// set the amount after the decimal
-	const char * banoshi_in_post_decimal = current_tx_amount_text + banoshi_in_offset_post_decimal;
-	char * banoshi_out_post_decimal = current_tx_amount_text_banoshi + banoshi_in_length_pre_decimal + 1;
-	os_memmove(banoshi_out_post_decimal,banoshi_in_post_decimal,banoshi_in_length_post_decimal);
+	// const unsigned int banoshi_in_offset_pre_decimal = sizeof(current_tx_amount_text) - banoshi_in_length;
+	// const unsigned int banoshi_in_length_pre_decimal = banoshi_in_length - (banoshi_decimal_offset + 1);
+	// const unsigned int banoshi_in_length_post_decimal = banoshi_decimal_offset;
+	// const unsigned int banoshi_in_offset_post_decimal = banoshi_in_offset_pre_decimal + banoshi_in_length_pre_decimal;
+
+	// // set the amount before the decimal
+	// const char * banoshi_in_pre_decimal = current_tx_amount_text + banoshi_in_offset_pre_decimal;
+	// void * banoshi_out_pre_decimal = current_tx_amount_text_banoshi;
+	// os_memmove(banoshi_out_pre_decimal,banoshi_in_pre_decimal,banoshi_in_length_pre_decimal);
+	//
+	// // set the decimal
+	// char * banoshi_out_decimal = current_tx_amount_text_banoshi + banoshi_in_length_pre_decimal;
+	// *banoshi_out_decimal = '.';
+	//
+	// // set the amount after the decimal
+	// const char * banoshi_in_post_decimal = current_tx_amount_text + banoshi_in_offset_post_decimal;
+	// char * banoshi_out_post_decimal = current_tx_amount_text_banoshi + banoshi_in_length_pre_decimal + 1;
+	// os_memmove(banoshi_out_post_decimal,banoshi_in_post_decimal,banoshi_in_length_post_decimal);
 
 }
