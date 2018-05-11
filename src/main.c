@@ -30,10 +30,6 @@
 
 #define EXIT_TIMER_REFRESH_INTERVAL 512
 
-#define DEBUG_OUT_LENGTH 0xFF
-
-const bool enable_debug_out = true;
-
 static void Timer_Tick() {
 	if (exit_timer > 0) {
 		exit_timer--;
@@ -269,23 +265,32 @@ static void banano_main(void) {
 				break;
 
 				case INS_GET_BASE_10_ENCODED: {
+					Timer_Restart();
 					unsigned int in_len = get_apdu_buffer_length();
 					unsigned char * in = G_io_apdu_buffer + APDU_HEADER_LENGTH;
 					if(in_len >= 0xFF) {
+						G_io_apdu_buffer[tx++] = 0x0E;
 						G_io_apdu_buffer[tx++] = in_len >> 24;
 						G_io_apdu_buffer[tx++] = in_len >> 16;
 						G_io_apdu_buffer[tx++] = in_len >> 8;
 						G_io_apdu_buffer[tx++] = in_len;
-						G_io_apdu_buffer[tx++] = 0xFF;
-						G_io_apdu_buffer[tx++] = 0xFF;
+						G_io_apdu_buffer[tx++] = 0xE0;
 						THROW(0x6D17);
 					}
-					char out[0x80];
+					char out[0x10];
 					os_memset(out,0x00,sizeof(out));
 					const unsigned int out_length = sizeof(out);
-					const bool enable_debug = true;
+					const bool enable_debug = DEBUG_OUT_ENABLED;
 					clearDebug();
 					encode_base_10(in, in_len, out,out_length,enable_debug);
+					G_io_apdu_buffer[tx++] = 0xFF;
+					G_io_apdu_buffer[tx++] = 0xF0;
+					G_io_apdu_buffer[tx++] = 0x0F;
+					os_memmove(G_io_apdu_buffer + tx, out, out_length);
+					tx += out_length;
+					G_io_apdu_buffer[tx++] = 0xF0;
+					G_io_apdu_buffer[tx++] = 0x0F;
+					G_io_apdu_buffer[tx++] = 0xFF;
 					THROW(0x9000);
 				}
 				break;
@@ -311,7 +316,7 @@ static void banano_main(void) {
 					sw = 0x6800 | (e & 0x7FF);
 					break;
 				}
-				if(enable_debug_out) {
+				if(DEBUG_OUT_ENABLED) {
 					const unsigned int debug_length = debug_ix;
 					os_memmove(G_io_apdu_buffer + tx, debug_out, debug_length);
 					tx += debug_length;
