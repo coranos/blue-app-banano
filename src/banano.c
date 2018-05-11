@@ -54,7 +54,8 @@ void update_public_key_data(const ed25519_public_key * public_key, bagl_icon_det
 	current_public_key_text[c] = '?';
 	c++;
 
-	encode_base_32((void *)public_key,sizeof(ed25519_public_key),current_public_key_text+c,sizeof(current_public_key_text)-c);
+	encode_base_32((void *)public_key,sizeof(ed25519_public_key),current_public_key_text+c,sizeof(current_public_key_text)-c,
+	               false);
 
 	update_public_key_display();
 
@@ -73,7 +74,8 @@ void update_tx_address_data(void) {
 	current_tx_address_text[sizeof(KEY_PREFIX_BAN)] = '?';
 
 	const unsigned int prefix_offset = sizeof(KEY_PREFIX_BAN) + 1;
-	encode_base_32((void *)raw_tx,32,current_tx_address_text+prefix_offset,sizeof(current_tx_address_text)-prefix_offset);
+	encode_base_32((void *)raw_tx,32,current_tx_address_text+prefix_offset,sizeof(current_tx_address_text)-prefix_offset,
+	               false);
 
 	unsigned int c = 0;
 	for(unsigned int x = 0; x < MAX_TX_ADDRESS_DIGITS; x++) {
@@ -105,7 +107,8 @@ void update_tx_amount_data(void) {
 	}
 
 	const void * in = (void *)current_tx_amount_char;
-	encode_base_10(in,in_length,current_tx_amount_text,sizeof(current_tx_amount_text));
+	encode_base_10(in,in_length,current_tx_amount_text,sizeof(current_tx_amount_text),
+	               false);
 
 	os_memset(current_tx_amount_text_banoshi,'\0',sizeof(current_tx_amount_text_banoshi));
 

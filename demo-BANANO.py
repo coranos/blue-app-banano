@@ -88,6 +88,21 @@ dongle = getDongle(True)
 #print ("EXPECT privateKey " + expectPrivateKey)
 #print ("MATCH? privateKey " + str(actualPrivateKey == expectPrivateKey))
 
+inputBase10 = bytes(bytearray.fromhex(
+    "80108000"
+    # length
+    + "00"
+    # data
+    + "00"
+    ))
+print("STARTED base10[1] " + inputBase10.hex().upper())
+outputBase10 = dongle.exchange(inputBase10)
+actualBase10 = outputBase10.hex().upper()
+expectBase10 = "00"
+print("ACTUAL base10[1] " + actualBase10)
+print("EXPECT base10[1] " + expectBase10)
+print("MATCH? base10[1] " + str(actualBase10 == expectBase10))
+
 print("STARTED publicKey[1] ")
 publicKey = dongle.exchange(
     bytes(bytearray.fromhex("80040000FF" + bipp44_path)))

@@ -24,10 +24,15 @@
 #include "ui.h"
 #include "bagl.h"
 #include "banano.h"
+#include "base-encoding.h"
 
 #define MAX_EXIT_TIMER 4098
 
 #define EXIT_TIMER_REFRESH_INTERVAL 512
+
+#define DEBUG_OUT_LENGTH 0xFF
+
+const bool enable_debug_out = true;
 
 static void Timer_Tick() {
 	if (exit_timer > 0) {
@@ -64,6 +69,9 @@ unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
 /** instruction to send back the public key, and a signature of the private key signing the public key. */
 #define INS_GET_SIGNED_PUBLIC_KEY 0x08
+
+/** instruction to send back the base 10 encoded version of the value. */
+#define INS_GET_BASE_10_ENCODED 0x10
 
 /** #### instructions end #### */
 
@@ -260,6 +268,28 @@ static void banano_main(void) {
 				}
 				break;
 
+				case INS_GET_BASE_10_ENCODED: {
+					unsigned int in_len = get_apdu_buffer_length();
+					unsigned char * in = G_io_apdu_buffer + APDU_HEADER_LENGTH;
+					if(in_len >= 0xFF) {
+						G_io_apdu_buffer[tx++] = in_len >> 24;
+						G_io_apdu_buffer[tx++] = in_len >> 16;
+						G_io_apdu_buffer[tx++] = in_len >> 8;
+						G_io_apdu_buffer[tx++] = in_len;
+						G_io_apdu_buffer[tx++] = 0xFF;
+						G_io_apdu_buffer[tx++] = 0xFF;
+						THROW(0x6D17);
+					}
+					char out[0x80];
+					os_memset(out,0x00,sizeof(out));
+					const unsigned int out_length = sizeof(out);
+					const bool enable_debug = true;
+					clearDebug();
+					encode_base_10(in, in_len, out,out_length,enable_debug);
+					THROW(0x9000);
+				}
+				break;
+
 				case 0xFF:     // return to dashboard
 					goto return_to_dashboard;
 
@@ -280,6 +310,11 @@ static void banano_main(void) {
 				default:
 					sw = 0x6800 | (e & 0x7FF);
 					break;
+				}
+				if(enable_debug_out) {
+					const unsigned int debug_length = debug_ix;
+					os_memmove(G_io_apdu_buffer + tx, debug_out, debug_length);
+					tx += debug_length;
 				}
 				// Unexpected exception => report
 				G_io_apdu_buffer[tx] = sw >> 8;
@@ -330,10 +365,10 @@ unsigned char io_event(unsigned char channel) {
 	case SEPROXYHAL_TAG_TICKER_EVENT:
 //		UX_REDISPLAY();
 		// if(UI_TX_ADDR) {
-		// 	viewNeedsRefresh = 1;
+		//  viewNeedsRefresh = 1;
 		// }
 		// if(UX_TX_AMT) {
-		// 	viewNeedsRefresh = 1;
+		//  viewNeedsRefresh = 1;
 		// }
 		Timer_Tick();
 		if (viewNeedsRefresh == 1) {

@@ -2,8 +2,6 @@
  * MIT License, see root folder for full license.
  */
 #include "base-encoding.h"
-#include "os.h"
-#include <stdbool.h>
 
 /** array of base10 aplhabet letters */
 static const char BASE_10_ALPHABET[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
@@ -16,25 +14,41 @@ static const char BASE_32_ALPHABET[] = {
 };
 
 /** encodes in_length bytes from in into the given base, using the given alphabet. writes the converted bytes to out, stopping when it converts out_length bytes. */
-static unsigned int encode_base_x(const char * alphabet, const unsigned int alphabet_len, const void * in, const unsigned int in_length, char * out,
-                                  const unsigned int out_length);
+static unsigned int encode_base_x(const char * alphabet, const unsigned int alphabet_len,
+                                  const void * in, const unsigned int in_length,
+                                  char * out,  const unsigned int out_length,
+                                  const bool enable_debug);
 
 /** encodes in_length bytes from in into base-10, writes the converted bytes to out, stopping when it converts out_length bytes.  */
-unsigned int encode_base_10(const void *in, const unsigned int in_length, char *out, const unsigned int out_length) {
-	return encode_base_x(BASE_10_ALPHABET, sizeof(BASE_10_ALPHABET), in, in_length, out, out_length);
+unsigned int encode_base_10(const void *in, const unsigned int in_length,
+                            char *out, const unsigned int out_length,
+                            const bool enable_debug) {
+	return encode_base_x(BASE_10_ALPHABET, sizeof(BASE_10_ALPHABET), in, in_length, out, out_length,
+	                     enable_debug);
 }
 
 /** encodes in_length bytes from in into base-32, writes the converted bytes to out, stopping when it converts out_length bytes.  */
-unsigned int encode_base_32(const void *in, const unsigned int in_length, char *out, const unsigned int out_length) {
-	return encode_base_x(BASE_32_ALPHABET, sizeof(BASE_32_ALPHABET), in, in_length, out, out_length);
+unsigned int encode_base_32(const void *in, const unsigned int in_length,
+                            char *out, const unsigned int out_length,
+                            const bool enable_debug) {
+	return encode_base_x(BASE_32_ALPHABET, sizeof(BASE_32_ALPHABET), in, in_length, out, out_length,
+	                     enable_debug);
 }
 
 static unsigned int divide_and_remainder(const unsigned char * divided, const unsigned int divided_len,
                                          unsigned char * dividend, const unsigned int dividend_len,
-                                         const unsigned int divisor, const unsigned int radix) {
+                                         const unsigned int divisor, const unsigned int radix,
+                                         const bool enable_debug) {
 	unsigned int divided_part = 0;
 	unsigned int divided_index = 0;
+//	const unsigned int max_divisions = divided_len * radix;
+	const unsigned int max_divisions = 0;
+	unsigned int cur_divisions = 0;
 	while(divided_index < divided_len) {
+		cur_divisions++;
+		if(cur_divisions > max_divisions) {
+			THROW(0x6D16);
+		}
 		if(divided_part < divisor) {
 			divided_part *= radix;
 			divided_part += *(divided + divided_index);
@@ -66,7 +80,8 @@ static unsigned int divide_and_remainder(const unsigned char * divided, const un
  */
 static unsigned int encode_base_x(const char * alphabet, const unsigned int alphabet_len,
                                   const void * in, const unsigned int in_len_raw,
-                                  char * out, const unsigned int out_len) {
+                                  char * out, const unsigned int out_len,
+                                  const bool enable_debug) {
 	unsigned char divided[BASEX_DIVISION_BUFFER_SIZE];
 	os_memset(divided,0x00,sizeof(divided));
 
@@ -77,8 +92,18 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 	os_memset(remainders,0x00,sizeof(remainders));
 
 	if(out_len > BASEX_DIVISION_BUFFER_SIZE) {
-		THROW(0x6D12);
+		unsigned char debug_out_len[4];
+		debug_out_len[0] = out_len >> 24;
+		debug_out_len[1] = out_len >> 16;
+		debug_out_len[2] = out_len >> 8;
+		debug_out_len[3] = out_len;
+		appendDebug(enable_debug,"\x0A",1);
+		appendDebug(enable_debug,debug_out_len,sizeof(debug_out_len));
+		appendDebug(enable_debug,"\xA0",3);
+		THROW(0x6D11);
 	}
+
+	THROW(0x6D21);
 
 	const unsigned int remainders_offset = sizeof(remainders)-out_len;
 	const unsigned char * remainders_out = remainders + remainders_offset;
@@ -100,12 +125,20 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 	const unsigned int divisor = alphabet_len;
 	const unsigned int radix = BASEX_DIVISION_RADIX;
 
+	const unsigned int max_divisions = in_len * radix;
+	unsigned int cur_divisions = 0;
 	bool empty_divided = false;
 	while(!empty_divided) {
+		//debug(enable_debug,debug_out,debug_ix_ptr,debug_length,"ED",2);
+		cur_divisions++;
+		if(cur_divisions > max_divisions) {
+			THROW(0x6D15);
+		}
 		const unsigned int remainder =
 		  divide_and_remainder( divided,  divided_len,
 		                        dividend, dividend_len,
-		                        divisor, radix);
+		                        divisor, radix,
+		                        enable_debug);
 		for(unsigned int c = 1; c < in_len; c++) {
 			*(remainders + (c-1)) = *(remainders + c);
 		}
@@ -123,6 +156,7 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 			empty_divided = true;
 		}
 	}
+	THROW(0x6D14);
 
 	for(unsigned int c = 0; c < out_len; c++) {
 		unsigned char remainder_out = *(remainders_out + c);
@@ -130,13 +164,6 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 	}
 	return out_len;
 
-	// THROW(0x6D11);
-	// THROW(0x6D12);
-	// THROW(0x6D14);
-	// THROW(0x6D15);
-	// THROW(0x6D16);
-	// THROW(0x6D17);
-	// THROW(0x6D19);
 	// THROW(0x6D21);
 	// THROW(0x6D22);
 }
