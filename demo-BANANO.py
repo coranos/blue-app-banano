@@ -18,6 +18,7 @@
 from ledgerblue.comm import getDongle
 from ledgerblue.commException import CommException
 import binascii
+import sys
 
 bipp44_path = (
     "8000002C"
@@ -88,20 +89,94 @@ dongle = getDongle(True)
 #print ("EXPECT privateKey " + expectPrivateKey)
 #print ("MATCH? privateKey " + str(actualPrivateKey == expectPrivateKey))
 
-inputBase10 = bytes(bytearray.fromhex(
-    "80108000"
-    # length
-    + "00"
-    # data
-    + "00"
+print("STARTED base10[1]")
+# buggy for 2560-2569, 5120-5130, 7680-7690
+for value in range(2559, 2570):
+    print("STARTED base10[1] " + str(value))
+    valueHex = format(value, '04X')
+    valueStr = format(value, '016')
+    print("INTERIM base10[1] valueHex " + valueHex)
+    print("INTERIM base10[1] valueStr " + valueStr)
+    inputBase10 = bytes(bytearray.fromhex(
+        "80108000"
+        # length
+        + "02"
+        # data
+        + valueHex
     ))
-print("STARTED base10[1] " + inputBase10.hex().upper())
-outputBase10 = dongle.exchange(inputBase10)
-actualBase10 = outputBase10.hex().upper()
-expectBase10 = "00"
-print("ACTUAL base10[1] " + actualBase10)
-print("EXPECT base10[1] " + expectBase10)
-print("MATCH? base10[1] " + str(actualBase10 == expectBase10))
+    print("INTERIM base10[1] " + inputBase10.hex().upper())
+    outputBase10 = dongle.exchange(inputBase10)
+    actualBase10 = outputBase10[0x03:0x13].decode("utf-8")
+    expectBase10 = valueStr
+    print("ACTUAL base10[1] " + actualBase10)
+    print("EXPECT base10[1] " + expectBase10)
+
+    match = "yes" if (actualBase10 == expectBase10) else "no"
+    print("MATCH? base10[1] " + match)
+
+    if (match == "no"):
+        raise ValueError('expected %s actual %s' %
+                         (expectBase10, actualBase10))
+print("SUCCESS base10[1]")
+
+# b6 = divided
+# a7 = remainder
+
+# 0a09 => 2569
+
+#     0100r9
+#     ----
+# A | 0A09
+#      A
+#      -
+#      009
+
+#      19r6
+#     ---
+# A | 100
+#      A
+#      -
+#      60
+
+# 0a0A => 2570
+#     0101r0
+#     ----
+# A | 0A0A
+#      A0A
+#      ---
+#      00A
+
+#      19r7
+#     ---
+# A | 101
+#      A
+#      -
+#      61
+#      5A
+#      --
+#       7
+
+# HID => 801080000209ff
+# HID <= fff00f30303030303030303030303032353539f00fff
+# 2b2b00000002b209ffb2
+# 6b6b00000002b609ffb6
+# 8b8b00000010b800000000000000000000000000000009b8
+# fbfb00000002bf00ffbf
+# fcfc00000001cfffcf
+# 6b6b00000001b6ffb68b8b00000010b800000000000000000000000000000509b8fbfb00000001bf19bffcfc00000001cf19cf6b6b00000001b619b68b8b00000010b800000000000000000000000000050509b8fbfb00000001bf02bffcfc00000001cf02cf6b6b00000001b602b68b8b00000010b800000000000000000000000002050509b8fbfb00000001bf00bffcfc00000000cfcf9000
+
+# HID => 80108000020a00
+# HID <= fff00f30303030303030303030303030303130f00fff
+# 2b2b00000002b20a00b2
+# 6b6b00000002b60a00b6
+# 8b8b00000010b800000000000000000000000000000000b8
+# fbfb00000002bf0001bf
+# fcfc00000001cf01c
+# f6b6b00000001b601b6
+# 8b8b00000010b800000000000000000000000000000100b8fbfb00000001bf00bffcfc00000000cfcf9000
+
+
+sys.exit(1)
 
 print("STARTED publicKey[1] ")
 publicKey = dongle.exchange(
