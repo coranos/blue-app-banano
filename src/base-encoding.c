@@ -150,6 +150,44 @@ unsigned int remove_zeros(unsigned char * divided, const unsigned int divided_le
 	return divided_len;
 }
 
+static bool dividedIsEmpty(const unsigned char * divided, const unsigned int divided_len) {
+	bool divided_all_zero = true;
+	for(unsigned int c = 0; c < divided_len; c++) {
+		if(*(divided+c) != 0) {
+			divided_all_zero = false;
+		}
+	}
+	bool empty_divided = false;
+	if(divided_all_zero) {
+		empty_divided = true;
+	}
+	return empty_divided;
+}
+
+/**
+ * set in_len to be the initial length (in_len_raw) but strip off all leading zeros.
+ * for each leading zero, subtract 1 from in_len, and shift the value in divided left one.
+ */
+unsigned int remove_zeros(unsigned char * divided, const unsigned int divided_len_raw) {
+	// removes zeros from left side.
+	unsigned int divided_len = divided_len_raw;
+	while((divided_len > 0) && ((*divided) == 0x00)) {
+		for(unsigned int c = 1; c < divided_len; c++) {
+			*(divided + (c-1)) = *(divided + c);
+		}
+		divided_len--;
+	}
+
+	// removes zeros from right side.
+	// while((divided_len > 0) && ((*divided + (divided_len-1)) == 0x00)) {
+	//  for(unsigned int c = 1; c < divided_len; c++) {
+	//    *(divided + (c-1)) = *(divided + c);
+	//  }
+	//  divided_len--;
+	// }
+	return divided_len;
+}
+
 /** encodes in_length bytes from in into the given base, using the given alphabet. writes the converted bytes to out, stopping when it converts out_length bytes.
  * algorithm:
  * 1) start with a input in base256 (in), and a divisor (alphabet_len).
