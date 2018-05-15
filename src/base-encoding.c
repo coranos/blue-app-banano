@@ -63,7 +63,7 @@ static unsigned int divide_and_remainder(const unsigned char * divided, const un
                                          unsigned char * dividend, const unsigned int dividend_len,
                                          const unsigned int divisor, const unsigned int radix,
                                          const bool enable_debug) {
-	bool divide_and_remainder_debug = enable_debug;
+	bool divide_and_remainder_debug = false;
 	unsigned int divided_part = 0;
 	unsigned int division_index = 0;
 	const unsigned int max_divisions = divided_len * radix;
@@ -83,17 +83,20 @@ static unsigned int divide_and_remainder(const unsigned char * divided, const un
 			divided_part *= radix;
 			divided_part += *(divided + division_index);
 			division_index++;
-			if(division_index < divided_len) {
-				for(unsigned int ix = 1; ix < dividend_len; ix++) {
-					*(dividend + (ix-1)) = *(dividend + (ix));
-				}
+			// shift the dividend left, and set lowest byte to zero.
+			for(unsigned int ix = 1; ix < dividend_len; ix++) {
+				*(dividend + (ix-1)) = *(dividend + (ix));
 			}
+			*(dividend + (dividend_len-1)) = 0;
 		}
 		// if the divided part is now greater than the divisor, divide and take the remainder.
 		// this is done in a seperate conditional statement than the previous,
 		// because you are modifying the divided_part in the previous conditional.
 		// so the two if statements look like they can be combined but they cannot be combined.
 		if(divided_part >= divisor) {
+			if(division_index > divided_len) {
+				THROW(0x6D23);
+			}
 			unsigned int dividend_part = divided_part / divisor;
 			appendDebugInteger(divide_and_remainder_debug,'\xBC',dividend_part,'\xCB');
 			appendDebugInteger(divide_and_remainder_debug,'\xCC',division_index,'\xCC');
@@ -110,44 +113,6 @@ static unsigned int divide_and_remainder(const unsigned char * divided, const un
 		appendDebugInteger(divide_and_remainder_debug,'\xFC',division_index,'\xCF');
 	}
 	return divided_part;
-}
-
-static bool dividedIsEmpty(const unsigned char * divided, const unsigned int divided_len) {
-	bool divided_all_zero = true;
-	for(unsigned int c = 0; c < divided_len; c++) {
-		if(*(divided+c) != 0) {
-			divided_all_zero = false;
-		}
-	}
-	bool empty_divided = false;
-	if(divided_all_zero) {
-		empty_divided = true;
-	}
-	return empty_divided;
-}
-
-/**
- * set in_len to be the initial length (in_len_raw) but strip off all leading zeros.
- * for each leading zero, subtract 1 from in_len, and shift the value in divided left one.
- */
-unsigned int remove_zeros(unsigned char * divided, const unsigned int divided_len_raw) {
-	// removes zeros from left side.
-	unsigned int divided_len = divided_len_raw;
-	while((divided_len > 0) && ((*divided) == 0x00)) {
-		for(unsigned int c = 1; c < divided_len; c++) {
-			*(divided + (c-1)) = *(divided + c);
-		}
-		divided_len--;
-	}
-
-	// removes zeros from right side.
-	// while((divided_len > 0) && ((*divided + (divided_len-1)) == 0x00)) {
-	//  for(unsigned int c = 1; c < divided_len; c++) {
-	//    *(divided + (c-1)) = *(divided + c);
-	//  }
-	//  divided_len--;
-	// }
-	return divided_len;
 }
 
 static bool dividedIsEmpty(const unsigned char * divided, const unsigned int divided_len) {
@@ -243,32 +208,32 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 	// make the first "divided" be the input.
 	os_memmove(divided, in, in_len_raw);
 
-	unsigned int in_len = remove_zeros(divided, in_len_raw);
+	unsigned int working_len = remove_zeros(divided, in_len_raw);
 
-	appendDebugInteger(trace_debug,'\x3A',in_len,'\xA3');
+	appendDebugInteger(trace_debug,'\x3A',working_len,'\xA3');
 
-	unsigned int divided_len = in_len;
-	unsigned int dividend_len = in_len;
 	const unsigned int divisor = alphabet_len;
 	const unsigned int radix = BASEX_DIVISION_RADIX;
 
-	appendDebugUnsignedCharArray(trace_debug,'\x4B',divided,divided_len,'\xB4');
+	appendDebugUnsignedCharArray(trace_debug,'\x4B',divided,working_len,'\xB4');
 
-	const unsigned int max_divisions = in_len * radix;
+	const unsigned int max_divisions = working_len * radix;
+	// const unsigned int max_divisions = 1;
 	unsigned int cur_divisions = 0;
-	bool empty_divided = dividedIsEmpty(divided,divided_len);
+	bool empty_divided = dividedIsEmpty(divided,working_len);
 	while(!empty_divided) {
 		cur_divisions++;
 
 		appendDebugInteger(trace_debug,'\x5A',cur_divisions,'\xA5');
-		appendDebugUnsignedCharArray(enable_debug,'\x6B',divided,divided_len,'\xB6');
+		appendDebugUnsignedCharArray(enable_debug,'\x6B',divided,working_len,'\xB6');
 
 		if(cur_divisions > max_divisions) {
 			THROW(0x6D15);
 		}
+
 		const unsigned int remainder =
-		  divide_and_remainder( divided,  divided_len,
-		                        dividend, dividend_len,
+		  divide_and_remainder( divided,  working_len,
+		                        dividend, working_len,
 		                        divisor, radix,
 		                        enable_debug);
 
@@ -282,17 +247,19 @@ static unsigned int encode_base_x(const char * alphabet, const unsigned int alph
 			THROW(0x6D24);
 		}
 		*(remainders_out + remainders_out_ix) = remainder;
-		remainders_out_ix--;
-		appendDebugUnsignedCharArray(enable_debug,'\x8B',remainders_out,out_len,'\xB8');
 
-		os_memmove(divided, dividend, divided_len);
-		appendDebugUnsignedCharArray(enable_debug,'\xFB',divided,divided_len,'\xBF');
-		divided_len = remove_zeros(divided, divided_len);
-		appendDebugUnsignedCharArray(enable_debug,'\xFC',divided,divided_len,'\xCF');
-		dividend_len = divided_len;
+		remainders_out_ix--;
+		appendDebugUnsignedCharArray(enable_debug,'\x8B',
+		                             remainders_out + remainders_out_ix,
+		                             out_len - remainders_out_ix,'\xB8');
+
+		os_memmove(divided, dividend, working_len);
+		appendDebugUnsignedCharArray(enable_debug,'\xFB',divided,working_len,'\xBF');
+		working_len = remove_zeros(divided, working_len);
+		appendDebugUnsignedCharArray(enable_debug,'\xFC',divided,working_len,'\xCF');
 		os_memset(dividend,0x00,sizeof(dividend));
 
-		empty_divided = dividedIsEmpty(divided,divided_len);
+		empty_divided = dividedIsEmpty(divided,working_len);
 	}
 
 	for(unsigned int c = 0; c < out_len; c++) {

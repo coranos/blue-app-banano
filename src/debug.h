@@ -6,9 +6,9 @@
 #include <stdbool.h>
 #include "os.h"
 
-#define DEBUG_OUT_ENABLED true
+#define DEBUG_OUT_ENABLED false
 
-#define DEBUG_OUT_LENGTH 0x01A4
+#define DEBUG_OUT_LENGTH 0x0100
 
 extern char debug_out[DEBUG_OUT_LENGTH];
 extern unsigned int debug_ix;

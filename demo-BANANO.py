@@ -92,7 +92,7 @@ dongle = getDongle(True)
 print("STARTED base10[1]")
 # buggy for 2560-2569, 5120-5130, 7680-7690
 # for value in range(2559, 2570):
-for value in range(0, 2570):
+for value in range(69990, 70000):
     print("STARTED base10[1] " + str(value))
     valueHex = format(value, '06X')
     valueStr = format(value, '016')
@@ -120,87 +120,7 @@ for value in range(0, 2570):
                          (expectBase10, actualBase10))
 print("SUCCESS base10[1]")
 
-# b6 = divided
-# a7 = remainder
-
-# 0a09 => 2569
-
-#     0100r9
-#     ----
-# A | 0A09
-#      A
-#      -
-#      009
-
-#      19r6
-#     ---
-# A | 100
-#      A
-#      -
-#      60
-
-# 0a0A => 2570
-#     0101r0
-#     ----
-# A | 0A0A
-#      A0A
-#      ---
-#      00A
-
-#      19r7
-#     ---
-# A | 101
-#      A
-#      -
-#      61
-#      5A
-#      --
-#       7
-
-# HID => 80108000020a0b
-# HID <= fff00f30303030303030303030303032353731f00fff
-# 2b2b00000002b20a0bb2
-# 6b6b00000002b 60a0b b6
-# 8b8b00000010b800000000000000000000000000000001b8
-# fcfc00000002cf0101cf
-# 6b6b00000002b6 0101 b6
-# 8b8b00000010b800000000000000000000000000000701b8
-# fcfc00000002cf0019cf
-# 6b6b00000002b6 0019 b6
-# 8b8b00000010b800000000000000000000000000050701b8
-# fcfc00000002cf0002cf
-# 6b6b00000002b6 0002 b6
-# 8b8b00000010b800000000000000000000000002050701b8
-# fcfc00000002cf0000cf
-# 9000
-
-# HID => 8010800003000a09
-# HID <= fff00f30303030303030303030303030303139f00fff
-# 2b2b00000003b2000a09b2
-# 6b6b00000002b6 0a09 b6
-# 9c00000000c9
-# ac00000000ca
-# bc00000001cb
-# cc00000001cc
-# cdcd00000002dc 0000 dc
-# dddd00000002dd 0001 dd
-# dc0000000acd
-# ec00000000ce
-# fc00000001cf => end of first round.
-# 9c00000000c9
-# ac00000001ca
-# ec00000009ce
-# fc00000002cf
-# 8b8b00000010b800000000000000000000000000000009b8fbfb00000002bf0001bffcfc00000001cf01cf6b6b00000001b601b69c00000000c9ac00000000caec00000001cefc00000001cf8b8b00000010b800000000000000000000000000000109b8fbfb00000001bf00bffcfc00000000cfcf9000
-
-# 2b2b00000003b200000ab2
-# 6b6b00000001b60ab6
-# 9c00000000c9
-# ac00000000ca
-# bc00000001cb
-# cc00000001cc6d25
-
-sys.exit(1)
+# sys.exit(1)
 
 print("STARTED publicKey[1] ")
 publicKey = dongle.exchange(
