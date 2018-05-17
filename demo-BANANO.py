@@ -145,6 +145,7 @@ print("MATCH? publicKey[2] " + str(actualPublicKey == expectPublicKey))
 for textToSign in textToSignArray:
     try:
         offset = 0
+        signature = 0x00.to_bytes(1, byteorder='big')
         while offset != len(textToSign):
             if (len(textToSign) - offset) > 255:
                 chunk = textToSign[offset: offset + 255]

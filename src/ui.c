@@ -379,8 +379,8 @@ static const bagl_element_t bagl_ui_tx_address_nanos[] = {
 	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 	/* first line of description of current public key */
 	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, "Address", 0, 0, 0, NULL, NULL, NULL, },
-	/* second line of description of current public key */
-	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 32 /* address text scrolls */}, current_tx_address_display, 0, 0, 0, NULL, NULL, NULL, },
+	/* second line of description of current public key, left */
+	{ { BAGL_LABELINE, 0x03, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 32 /* address text scrolls */}, current_tx_address_display, 0, 0, 0, NULL, NULL, NULL, },
 	/* left icon is up arrow  */
 	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 	/* right icon is down arrow  */
@@ -406,7 +406,6 @@ static unsigned int bagl_ui_tx_address_nanos_button(unsigned int button_mask, un
 	}
 	return 0;
 }
-
 
 /** UI struct for the transaction amount screen, Nano S. */
 static const bagl_element_t bagl_ui_tx_amount_nanos[] = {

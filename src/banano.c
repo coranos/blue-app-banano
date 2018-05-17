@@ -19,6 +19,8 @@ static const char NO_KEY[] = "THE LEDGER ISWAITING FOR APUBLIC KEY TOBE  REQUEST
 /** */
 static const char KEY_PREFIX_BAN[] = "BAN_";
 
+static int current_tx_address_display_ix = 0;
+
 static void update_public_key_display() {
 	os_memset(current_public_key_display,'\0',sizeof(current_public_key_display));
 	unsigned int c = 0;
@@ -77,12 +79,24 @@ void update_tx_address_data(void) {
 	encode_base_32((void *)raw_tx,32,current_tx_address_text+prefix_offset,sizeof(current_tx_address_text)-prefix_offset,
 	               false);
 
-	unsigned int c = 0;
-	for(unsigned int x = 0; x < MAX_TX_ADDRESS_DIGITS; x++) {
+	current_tx_address_display_ix = 0;
+	scroll_current_tx_address_display();
+}
+
+void scroll_current_tx_address_display(void) {
+	unsigned int c = current_tx_address_display_ix;
+
+	os_memset(current_tx_address_display,'\0',sizeof(current_tx_address_display));
+
+	for(unsigned int x = 0; (x < MAX_TX_ADDRESS_DIGITS) && (c < MAX_PUBLIC_KEY_DIGITS); x++) {
 		current_tx_address_display[x] = current_public_key_text[c];
 		c++;
 	}
 	current_tx_address_display[MAX_TX_ADDRESS_DIGITS] = '\0';
+	current_tx_address_display_ix++;
+	if(current_tx_address_display_ix > (MAX_PUBLIC_KEY_DIGITS - 10)) {
+		current_tx_address_display_ix = 0;
+	}
 }
 
 unsigned int min_tx_len(void) {

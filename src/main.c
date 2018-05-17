@@ -369,9 +369,12 @@ unsigned char io_event(unsigned char channel) {
 
 	case SEPROXYHAL_TAG_TICKER_EVENT:
 //		UX_REDISPLAY();
-		// if(UI_TX_ADDR) {
-		//  viewNeedsRefresh = 1;
-		// }
+		if(UI_TX_ADDR) {
+			if( exit_timer % 2 == 0) {
+				scroll_current_tx_address_display();
+				viewNeedsRefresh = 1;
+			}
+		}
 		// if(UX_TX_AMT) {
 		//  viewNeedsRefresh = 1;
 		// }
