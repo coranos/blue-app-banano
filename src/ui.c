@@ -29,8 +29,8 @@ unsigned char viewNeedsRefresh;
 /** current public key text. */
 char current_public_key_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
 
-/** current transaction address display. +1 for zero end.*/
-char current_tx_address_display[MAX_TX_ADDRESS_DIGITS+1];
+/** current transaction address display.*/
+char current_tx_address_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
 
 /** current transaction amount text. +1 for zero end.*/
 char current_tx_amount_text[MAX_TX_AMOUNT_DIGITS+1];
@@ -57,7 +57,10 @@ static const bagl_element_t * io_seproxyhal_touch_exit(const bagl_element_t *e);
 static const bagl_element_t * io_seproxyhal_touch_deny(const bagl_element_t *e);
 
 /** display the transaction address */
-static void ui_display_tx_address(void);
+static void ui_display_tx_address_1(void);
+static void ui_display_tx_address_2(void);
+static void ui_display_tx_address_3(void);
+static void ui_display_tx_address_4(void);
 
 /** display the transaction amount */
 static void ui_display_tx_amount(void);
@@ -372,15 +375,15 @@ static unsigned int bagl_ui_deny_nanos_button(unsigned int button_mask, unsigned
 }
 
 /** UI struct for the transaction address screen, Nano S. */
-static const bagl_element_t bagl_ui_tx_address_nanos[] = {
+static const bagl_element_t bagl_ui_tx_address_nanos_1[] = {
 // { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
 // text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
 // },
 	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 	/* first line of description of current public key */
-	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, "Address", 0, 0, 0, NULL, NULL, NULL, },
-	/* second line of description of current public key, left */
-	{ { BAGL_LABELINE, 0x03, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 32 /* address text scrolls */}, current_tx_address_display, 0, 0, 0, NULL, NULL, NULL, },
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_tx_address_display[0], 0, 0, 0, NULL, NULL, NULL, },
+	/* second line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_tx_address_display[1], 0, 0, 0, NULL, NULL, NULL, },
 	/* left icon is up arrow  */
 	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
 	/* right icon is down arrow  */
@@ -394,7 +397,114 @@ static const bagl_element_t bagl_ui_tx_address_nanos[] = {
  *
  * up on Left button, down on right button.
  */
-static unsigned int bagl_ui_tx_address_nanos_button(unsigned int button_mask, unsigned int button_mask_counter) {
+static unsigned int bagl_ui_tx_address_nanos_1_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	switch (button_mask) {
+	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
+		tx_desc_dn(NULL);
+		break;
+
+	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
+		tx_desc_up(NULL);
+		break;
+	}
+	return 0;
+}
+
+/** UI struct for the transaction address screen, Nano S. */
+static const bagl_element_t bagl_ui_tx_address_nanos_2[] = {
+// { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
+// text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
+// },
+	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* first line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_tx_address_display[0], 0, 0, 0, NULL, NULL, NULL, },
+	/* second line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_tx_address_display[1], 0, 0, 0, NULL, NULL, NULL, },
+	/* left icon is up arrow  */
+	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* right icon is down arrow  */
+	{ { BAGL_ICON, 0x00, 117, 13, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+
+/* */
+};
+
+/**
+ * buttons for the transaction address screen
+ *
+ * up on Left button, down on right button.
+ */
+static unsigned int bagl_ui_tx_address_nanos_2_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	switch (button_mask) {
+	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
+		tx_desc_dn(NULL);
+		break;
+
+	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
+		tx_desc_up(NULL);
+		break;
+	}
+	return 0;
+}
+
+/** UI struct for the transaction address screen, Nano S. */
+static const bagl_element_t bagl_ui_tx_address_nanos_3[] = {
+// { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
+// text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
+// },
+	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* first line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_tx_address_display[1], 0, 0, 0, NULL, NULL, NULL, },
+	/* second line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_tx_address_display[2], 0, 0, 0, NULL, NULL, NULL, },
+	/* left icon is up arrow  */
+	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* right icon is down arrow  */
+	{ { BAGL_ICON, 0x00, 117, 13, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+
+/* */
+};
+
+/**
+ * buttons for the transaction address screen
+ *
+ * up on Left button, down on right button.
+ */
+static unsigned int bagl_ui_tx_address_nanos_3_button(unsigned int button_mask, unsigned int button_mask_counter) {
+	switch (button_mask) {
+	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
+		tx_desc_dn(NULL);
+		break;
+
+	case BUTTON_EVT_RELEASED | BUTTON_LEFT:
+		tx_desc_up(NULL);
+		break;
+	}
+	return 0;
+}
+
+/** UI struct for the transaction address screen, Nano S. */
+static const bagl_element_t bagl_ui_tx_address_nanos_4[] = {
+// { {type, userid, x, y, width, height, stroke, radius, fill, fgcolor, bgcolor, font_id, icon_id},
+// text, touch_area_brim, overfgcolor, overbgcolor, tap, out, over,
+// },
+	{ { BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000, 0xFFFFFF, 0, 0 }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* first line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_1_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_tx_address_display[2], 0, 0, 0, NULL, NULL, NULL, },
+	/* second line of description of current public key */
+	{ { BAGL_LABELINE, 0x02, LINE_X_INDENT, LINE_2_OFFSET, 108, 11, 0, 0, 0, 0xFFFFFF, 0x000000, DESCRIPTION_FONT, 0}, current_tx_address_display[3], 0, 0, 0, NULL, NULL, NULL, },
+	/* left icon is up arrow  */
+	{ { BAGL_ICON, 0x00, 3, 12, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_UP }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+	/* right icon is down arrow  */
+	{ { BAGL_ICON, 0x00, 117, 13, 7, 7, 0, 0, 0, 0xFFFFFF, 0x000000, 0, BAGL_GLYPH_ICON_DOWN }, NULL, 0, 0, 0, NULL, NULL, NULL, },
+/* */
+};
+
+/**
+ * buttons for the transaction address screen
+ *
+ * up on Left button, down on right button.
+ */
+static unsigned int bagl_ui_tx_address_nanos_4_button(unsigned int button_mask, unsigned int button_mask_counter) {
 	switch (button_mask) {
 	case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
 		tx_desc_dn(NULL);
@@ -457,12 +567,24 @@ static const bagl_element_t * tx_desc_up(const bagl_element_t *e) {
 		ui_deny();
 		break;
 
-	case UI_TX_ADDR:
+	case UI_TX_ADDR_1:
 		ui_sign();
 		break;
 
+	case UI_TX_ADDR_2:
+		ui_display_tx_address_1();
+		break;
+
+	case UI_TX_ADDR_3:
+		ui_display_tx_address_2();
+		break;
+
+	case UI_TX_ADDR_4:
+		ui_display_tx_address_3();
+		break;
+
 	case UX_TX_AMT:
-		ui_display_tx_address();
+		ui_display_tx_address_4();
 		break;
 
 	case UI_DENY:
@@ -480,10 +602,22 @@ static const bagl_element_t * tx_desc_up(const bagl_element_t *e) {
 static const bagl_element_t * tx_desc_dn(const bagl_element_t *e) {
 	switch (uiState) {
 	case UI_SIGN:
-		ui_display_tx_address();
+		ui_display_tx_address_1();
 		break;
 
-	case UI_TX_ADDR:
+	case UI_TX_ADDR_1:
+		ui_display_tx_address_2();
+		break;
+
+	case UI_TX_ADDR_2:
+		ui_display_tx_address_3();
+		break;
+
+	case UI_TX_ADDR_3:
+		ui_display_tx_address_4();
+		break;
+
+	case UI_TX_ADDR_4:
 		ui_display_tx_amount();
 		break;
 
@@ -588,12 +722,45 @@ void ui_idle(void) {
 }
 
 /** show the transaction address screen. */
-static void ui_display_tx_address(void) {
-	uiState = UI_TX_ADDR;
+static void ui_display_tx_address_1(void) {
+	uiState = UI_TX_ADDR_1;
 	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
 		THROW(0x6DBL);
 	} else {
-		UX_DISPLAY(bagl_ui_tx_address_nanos, NULL);
+		UX_DISPLAY(bagl_ui_tx_address_nanos_1, NULL);
+	}
+}
+
+
+/** show the transaction address screen. */
+static void ui_display_tx_address_2(void) {
+	uiState = UI_TX_ADDR_2;
+	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
+		THROW(0x6DBL);
+	} else {
+		UX_DISPLAY(bagl_ui_tx_address_nanos_2, NULL);
+	}
+}
+
+
+/** show the transaction address screen. */
+static void ui_display_tx_address_3(void) {
+	uiState = UI_TX_ADDR_3;
+	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
+		THROW(0x6DBL);
+	} else {
+		UX_DISPLAY(bagl_ui_tx_address_nanos_3, NULL);
+	}
+}
+
+
+/** show the transaction address screen. */
+static void ui_display_tx_address_4(void) {
+	uiState = UI_TX_ADDR_4;
+	if (os_seph_features() & SEPROXYHAL_TAG_SESSION_START_EVENT_FEATURE_SCREEN_BIG) {
+		THROW(0x6DBL);
+	} else {
+		UX_DISPLAY(bagl_ui_tx_address_nanos_4, NULL);
 	}
 }
 

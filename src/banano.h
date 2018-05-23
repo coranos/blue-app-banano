@@ -30,8 +30,5 @@ void update_icon_buffer_to_current_public_key(void);
 /** updates the icon buffer to contains teh transaction address  */
 void update_icon_buffer_to_current_tx_address(void);
 
-/** scrolls the address display left by one character */
-void scroll_current_tx_address_display(void);
-
 
 #endif // BANANO_H

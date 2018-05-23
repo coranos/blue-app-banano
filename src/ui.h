@@ -91,7 +91,7 @@ extern int exit_timer;
 
 /** UI currently displayed */
 enum UI_STATE {
-	UI_INIT, UI_IDLE, UI_SIGN, UI_TX_ADDR, UX_TX_AMT, UI_DENY,
+	UI_INIT, UI_IDLE, UI_SIGN, UI_TX_ADDR_1,UI_TX_ADDR_2,UI_TX_ADDR_3,UI_TX_ADDR_4, UX_TX_AMT, UI_DENY,
 	UI_PUBLIC_KEY_1, UI_PUBLIC_KEY_2, UI_PUBLIC_KEY_3, UI_PUBLIC_KEY_4
 };
 
@@ -108,7 +108,7 @@ extern unsigned char viewNeedsRefresh;
 extern char current_public_key_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
 
 /** current transaction address display. +1 for zero end.*/
-extern char current_tx_address_display[MAX_TX_ADDRESS_DIGITS+1];
+extern char current_tx_address_display[NUM_TEXT_DISPLAY_LINES][NUM_TEXT_DISPLAY_WIDTH];
 
 /** current transaction amount text. +1 for zero end.*/
 extern char current_tx_amount_text[MAX_TX_AMOUNT_DIGITS+1];
